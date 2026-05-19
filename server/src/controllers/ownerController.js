@@ -24,7 +24,7 @@ export const createOwner = async (req, res) => {
     if (!req.file) {
       return res.status(400).json({
         success: false,
-        message: "Profile image is required",
+        message: "Owner image is required",
       });
     }
 
@@ -55,7 +55,7 @@ export const createOwner = async (req, res) => {
       success: true,
       message:
         "Owner created successfully. please Login with Registered Mobile Number!!",
-      player,
+      owner,
     });
   } catch (error) {
     return res.status(500).json({
