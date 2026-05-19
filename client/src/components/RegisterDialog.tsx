@@ -12,6 +12,8 @@ import {
     AvatarImage,
 } from "@/components/ui/avatar";
 
+import { AxiosError } from "axios";
+
 import {
     Select,
     SelectContent,
@@ -59,6 +61,8 @@ import { registerPlayer } from "@/services/player/playerService";
 
 import { getAllSeasons } from "@/services/seasons/seasonsService"
 
+import { createOwner } from "@/services/owner/ownerService";
+
 // ======================================================
 // TYPES
 // ======================================================
@@ -67,6 +71,10 @@ type RegisterDialogProps = {
     open: boolean;
     onOpenChange: (open: boolean) => void;
 };
+
+type ApiError = AxiosError<{
+    message?: string;
+}>;
 
 type RoleType =
     | "PLAYER"
@@ -338,79 +346,94 @@ export default function RegisterDialog({
     // MUTATION
     // ======================================================
 
-    const registerMutation =
-        useMutation({
-            mutationFn:
-                registerPlayer,
+    // ======================================================
+    // COMMON RESET
+    // ======================================================
 
-            onSuccess: (
-                data: {
-                    message: string;
-                },
-            ) => {
+    const resetForm = () => {
 
-                toast.success(
-                    "Registration Successful 🎉",
-                    {
-                        description:
-                            data.message,
-                    },
-                );
+        reset();
 
-                reset();
+        setPreviewImage(
+            "https://github.com/shadcn.png",
+        );
 
-                setPreviewImage(
-                    "https://github.com/shadcn.png",
-                );
+        setSelectedFile(null);
 
-                setSelectedFile(
-                    null,
-                );
+        setRole("PLAYER");
 
-                setRole(
-                    "PLAYER",
-                );
-
-                onOpenChange(
-                    false,
-                );
-            },
-
-            onError: (
-                error: {
-                    response?: {
-                        data?: {
-                            message?: string;
-                        };
-                    };
-                },
-            ) => {
-
-                toast.error(
-                    "Registration Failed",
-                    {
-                        description:
-                            error
-                                ?.response
-                                ?.data
-                                ?.message ||
-                            "Something went wrong",
-                    },
-                );
-            },
-        });
+        onOpenChange(false);
+    };
 
     // ======================================================
-    // SUBMIT
+    // PLAYER MUTATION
     // ======================================================
+
+    const playerMutation = useMutation({
+        mutationFn: registerPlayer,
+
+        onSuccess: (data: { message: string }) => {
+
+            toast.success(
+                "Player Registration Successful 🎉",
+                {
+                    description: data.message
+                }
+            );
+
+            resetForm();
+        },
+
+        onError: (error: ApiError) => {
+
+            toast.error(
+                "Player Registration Failed",
+                {
+                    description:
+                        error?.response?.data?.message ||
+                        "Something went wrong"
+                }
+            );
+        }
+    });
+
+    // ======================================================
+    // OWNER MUTATION
+    // ======================================================
+
+    const ownerMutation = useMutation({
+        mutationFn: createOwner,
+
+        onSuccess: (data: { message: string }) => {
+
+            toast.success(
+                "Owner Registration Successful 🎉",
+                {
+                    description: data.message
+                }
+            );
+
+            resetForm();
+        },
+
+        onError: (error: ApiError) => {
+
+            toast.error(
+                "Owner Registration Failed",
+                {
+                    description:
+                        error?.response?.data?.message ||
+                        "Something went wrong"
+                }
+            );
+        }
+    });
 
     const onSubmit = (
         data: RegisterFormData,
     ) => {
 
-        if (
-            !selectedFile
-        ) {
+        if (!selectedFile) {
 
             toast.error(
                 "Please upload profile image",
@@ -442,18 +465,14 @@ export default function RegisterDialog({
         );
 
         formData.append(
-            "roleType",
-            data.roleType,
+            "season",
+            data.season || "",
         );
 
-        if (
-            data.season
-        ) {
-            formData.append(
-                "season",
-                data.season,
-            );
-        }
+        formData.append(
+            "profileImage",
+            selectedFile,
+        );
 
         if (
             data.roleType ===
@@ -462,37 +481,33 @@ export default function RegisterDialog({
 
             formData.append(
                 "playingRole",
-                data.playingRole ||
-                "",
+                data.playingRole || ""
             );
 
             formData.append(
                 "basePrice",
-                data.basePrice ||
-                "0",
+                data.basePrice || "0"
+            );
+
+            playerMutation.mutate(
+                formData
             );
         }
 
-        if (
+        else if (
             data.roleType ===
             "OWNER"
         ) {
 
             formData.append(
                 "purseValue",
-                data.purseValue ||
-                "25000",
+                data.purseValue || "25000"
+            );
+
+            ownerMutation.mutate(
+                formData
             );
         }
-
-        formData.append(
-            "profileImage",
-            selectedFile,
-        );
-
-        registerMutation.mutate(
-            formData,
-        );
     };
 
     // ======================================================
@@ -1030,11 +1045,15 @@ export default function RegisterDialog({
                                     <Button
                                         type="submit"
                                         disabled={
-                                            registerMutation.isPending
+                                            playerMutation.isPending ||
+                                            ownerMutation.isPending
                                         }
                                         className="h-13 flex-1 rounded-xl bg-yellow-400 font-bold text-black hover:bg-yellow-500"
                                     >
-                                        {registerMutation.isPending ? (
+                                        {(
+                                            playerMutation.isPending ||
+                                            ownerMutation.isPending
+                                        ) ? (
                                             <Loader2 className="animate-spin" />
                                         ) : (
                                             "Submit Registration"
