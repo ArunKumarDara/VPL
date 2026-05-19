@@ -550,7 +550,7 @@ export default function RegisterDialog({
                                 <div>
 
                                     <h2 className="text-4xl font-black tracking-tight text-white">
-                                        VPL 2026
+                                        RPL 2026
                                     </h2>
 
                                     <p className="mt-1 text-xs font-bold uppercase tracking-[0.4em] text-yellow-400">
@@ -565,7 +565,7 @@ export default function RegisterDialog({
 
                                     <Sparkles size={16} />
 
-                                    Vidhyanagar Premier League
+                                    Redfort Premier League
                                 </div>
 
                                 <h3 className="mt-6 text-5xl font-black leading-tight text-white">
@@ -580,7 +580,7 @@ export default function RegisterDialog({
                                 <p className="mt-6 max-w-lg text-base leading-8 text-white/65">
                                     Register yourself as a player,
                                     team owner, or admin and become
-                                    part of the VPL experience.
+                                    part of the RPL experience.
                                 </p>
                             </div>
 
