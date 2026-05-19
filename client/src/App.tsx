@@ -97,12 +97,12 @@ export default function App() {
           {/* Logo */}
           <div className="flex items-center gap-3">
             <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-yellow-400 text-sm font-black text-black shadow-lg shadow-yellow-400/20 sm:size-12">
-              VPL
+              RPL
             </div>
 
             <div>
               <h1 className="text-sm font-black leading-none tracking-wide sm:text-lg">
-                VIDHYANAGAR
+                REDFORT
               </h1>
 
               <p className="mt-1 text-xs font-semibold tracking-[0.2em] text-yellow-400 sm:text-sm">
@@ -153,7 +153,7 @@ export default function App() {
                 <a
                   key={item}
                   href="#"
-                  className="flex items-center justify-between rounded-xl border border-white/5 bg-white/[0.03] px-4 py-3 text-sm font-semibold text-white/80 transition hover:border-yellow-400/30 hover:bg-yellow-400/10 hover:text-yellow-300"
+                  className="flex items-center justify-between rounded-xl border border-white/5 bg-white/3 px-4 py-3 text-sm font-semibold text-white/80 transition hover:border-yellow-400/30 hover:bg-yellow-400/10 hover:text-yellow-300"
                 >
                   {item}
                 </a>
@@ -191,7 +191,7 @@ export default function App() {
 
             <p className="mt-6 max-w-xl text-base leading-7 text-white/75 sm:text-lg">
               Join the biggest hometown cricket tournament and watch teams,
-              players, and rivalries come alive under the VPL lights.
+              players, and rivalries come alive under the RPL lights.
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -248,7 +248,7 @@ export default function App() {
             <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.07] shadow-2xl shadow-black/30 backdrop-blur-xl">
               <div className="p-5">
                 <p className="text-xs font-bold uppercase tracking-[0.3em] text-white/45">
-                  VPL Season 1
+                  RPL Season 1
                 </p>
 
                 <div className="mt-4 flex items-start gap-4">
@@ -260,14 +260,14 @@ export default function App() {
                     <h3 className="text-2xl font-black leading-tight sm:text-3xl">
                       The First Ever
                       <span className="block text-yellow-400">
-                        Vidhyanagar Premier League
+                        Redfort Premier League
                       </span>
                     </h3>
 
                     <p className="mt-3 text-sm leading-6 text-white/60">
                       A new cricket tradition begins. Experience thrilling matches,
                       live auctions, passionate teams, and unforgettable moments in
-                      the inaugural VPL season.
+                      the inaugural RPL season.
                     </p>
                   </div>
                 </div>
