@@ -8,6 +8,7 @@ import playerRoutes from "./routes/playerRoutes.js";
 import ownerRoutes from "./routes/ownerRoutes.js";
 import seasonRoutes from "./routes/seasonRoutes.js";
 import auctionRoutes from "./routes/auctionRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
 
 const app = express();
 
@@ -40,6 +41,7 @@ app.use("/api/v1/players", playerRoutes);
 app.use("/api/v1/owners", ownerRoutes);
 app.use("/api/v1/seasons", seasonRoutes);
 app.use("/api/v1/auctions", auctionRoutes);
+app.use("api/v1/admin", adminRoutes);
 
 app.use((req, res) => {
   return res.status(404).json({
