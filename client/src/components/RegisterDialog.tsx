@@ -63,6 +63,8 @@ import { getAllSeasons } from "@/services/seasons/seasonsService"
 
 import { createOwner } from "@/services/owner/ownerService";
 
+import { createAdmin } from "@/services/admin/adminService";
+
 // ======================================================
 // TYPES
 // ======================================================
@@ -277,16 +279,7 @@ export default function RegisterDialog({
     // GET SEASONS
     // ======================================================
 
-    const {
-        data: seasonsData,
-        isLoading: seasonLoading,
-    } = useQuery({
-        queryKey: ["seasons"],
-        queryFn: getAllSeasons,
-    });
 
-    const seasons =
-        seasonsData || [];
 
     // ======================================================
     // FORM
@@ -316,6 +309,20 @@ export default function RegisterDialog({
 
     const selectedRole =
         watch("roleType");
+
+    const {
+        data: seasonsData,
+        isLoading: seasonLoading,
+    } = useQuery({
+        queryKey: ["seasons"],
+        queryFn: getAllSeasons,
+        enabled:
+            selectedRole === "PLAYER" ||
+            selectedRole === "OWNER",
+    });
+
+    const seasons =
+        seasonsData || [];
 
     // ======================================================
     // IMAGE HANDLER
@@ -429,6 +436,38 @@ export default function RegisterDialog({
         }
     });
 
+    // ======================================================
+    // ADMIN MUTATION
+    // ======================================================
+
+    const adminMutation = useMutation({
+        mutationFn: createAdmin,
+
+        onSuccess: (data: { message: string }) => {
+
+            toast.success(
+                "Admin Registration Successful 🎉",
+                {
+                    description: data.message
+                }
+            );
+
+            resetForm();
+        },
+
+        onError: (error: ApiError) => {
+
+            toast.error(
+                "Admin Registration Failed",
+                {
+                    description:
+                        error?.response?.data?.message ||
+                        "Something went wrong"
+                }
+            );
+        }
+    });
+
     const onSubmit = (
         data: RegisterFormData,
     ) => {
@@ -465,19 +504,19 @@ export default function RegisterDialog({
         );
 
         formData.append(
-            "season",
-            data.season || "",
-        );
-
-        formData.append(
             "profileImage",
             selectedFile,
         );
 
+        // PLAYER
         if (
-            data.roleType ===
-            "PLAYER"
+            data.roleType === "PLAYER"
         ) {
+
+            formData.append(
+                "season",
+                data.season || "",
+            );
 
             formData.append(
                 "playingRole",
@@ -494,10 +533,15 @@ export default function RegisterDialog({
             );
         }
 
+        // OWNER
         else if (
-            data.roleType ===
-            "OWNER"
+            data.roleType === "OWNER"
         ) {
+
+            formData.append(
+                "season",
+                data.season || "",
+            );
 
             formData.append(
                 "purseValue",
@@ -505,6 +549,16 @@ export default function RegisterDialog({
             );
 
             ownerMutation.mutate(
+                formData
+            );
+        }
+
+        // ADMIN
+        else if (
+            data.roleType === "ADMIN"
+        ) {
+
+            adminMutation.mutate(
                 formData
             );
         }
@@ -1046,18 +1100,24 @@ export default function RegisterDialog({
                                         type="submit"
                                         disabled={
                                             playerMutation.isPending ||
-                                            ownerMutation.isPending
+                                            ownerMutation.isPending ||
+                                            adminMutation.isPending
                                         }
                                         className="h-13 flex-1 rounded-xl bg-yellow-400 font-bold text-black hover:bg-yellow-500"
                                     >
-                                        {(
-                                            playerMutation.isPending ||
-                                            ownerMutation.isPending
-                                        ) ? (
-                                            <Loader2 className="animate-spin" />
-                                        ) : (
-                                            "Submit Registration"
-                                        )}
+                                        {
+                                            (
+                                                playerMutation.isPending ||
+                                                ownerMutation.isPending ||
+                                                adminMutation.isPending
+                                            )
+                                                ? (
+                                                    <Loader2 className="animate-spin" />
+                                                )
+                                                : (
+                                                    "Submit Registration"
+                                                )
+                                        }
                                     </Button>
                                 </div>
                             </div>
