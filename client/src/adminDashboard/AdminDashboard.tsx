@@ -13,47 +13,36 @@ import {
     ChevronRight,
 } from "lucide-react";
 
+import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+
 import Navbar from "@/components/Navbar";
 
-const stats = [
-    {
-        title: "Seasons",
-        value: "03",
-        icon: Trophy,
-    },
-
-    {
-        title: "Teams",
-        value: "12",
-        icon: Shield,
-    },
-
-    {
-        title: "Players",
-        value: "240",
-        icon: Users,
-    },
-
-    {
-        title: "Owners",
-        value: "12",
-        icon: UserPlus,
-    },
-];
+import { getAllSeasons } from "@/services/seasons/seasonsService"
+import { getAllTeams } from "@/services/team/teamService";
+import { getAllPlayers } from "@/services/player/playerService";
+import { getAllOwners } from "@/services/owner/ownerService";
+import { useState } from "react";
+import RegisterDialog from "@/components/RegisterDialog";
+import CreateTeamDialog from "@/components/createTeamDialog";
+import { Season } from "@/api/seasonApi";
 
 const quickActions = [
-    {
-        title: "Create Season",
-        description: "Manage tournament seasons",
-        icon: Trophy,
-    },
 
     {
         title: "Add Owner",
         description: "Create and assign owners",
         icon: UserPlus,
+        action: "OPEN_OWNER_MODAL",
+    },
+    {
+        title: "Create Team",
+        description: "Manage Owner Team",
+        icon: Trophy,
+        action: "OPEN_TEAM_MODAL",
     },
 
     {
@@ -69,39 +58,90 @@ const quickActions = [
     },
 ];
 
-const seasons = [
-    {
-        season: "Season 1",
-        status: "Completed",
-        teams: 8,
-        players: 120,
-    },
-
-    {
-        season: "Season 2",
-        status: "Completed",
-        teams: 10,
-        players: 180,
-    },
-
-    {
-        season: "Season 3",
-        status: "Active",
-        teams: 12,
-        players: 240,
-    },
-];
-
 const activity = [
-    "Season 3 created",
+    "Season created",
     "New owner assigned",
-    "Player base price updated",
-    "Auction scheduled",
+    "Player registered",
+    "Auction configured",
 ];
 
 export default function AdminDashboard() {
+    const navigate = useNavigate();
+    const [openOwnerModal, setOpenOwnerModal] = useState(false);
+    const [openTeamModal, setOpenTeamModal] = useState(false);
+    const {
+        data: seasons = [],
+        isLoading: seasonsLoading,
+    } = useQuery({
+        queryKey: ["all-seasons"],
+        queryFn: getAllSeasons,
+    });
+
+    const {
+        data: teams,
+        isLoading: teamsLoading,
+    } = useQuery({
+        queryKey: ["all-teams"],
+        queryFn: getAllTeams,
+    });
+
+    const {
+        data: players,
+        isLoading: playersLoading,
+    } = useQuery({
+        queryKey: ["all-players"],
+        queryFn: getAllPlayers,
+    });
+
+    const {
+        data: owners,
+        isLoading: ownersLoading,
+    } = useQuery({
+        queryKey: ["all-owners"],
+        queryFn: getAllOwners,
+    });
+
+    const isLoading =
+        seasonsLoading ||
+        teamsLoading ||
+        playersLoading ||
+        ownersLoading;
+
+    const latestSeason =
+        seasons.length > 0
+            ? seasons[0]
+            : null;
+
+
+    const stats = [
+        {
+            title: "Seasons",
+            value: String(seasons.length).padStart(2, "0"),
+            icon: Trophy,
+        },
+
+        {
+            title: "Teams",
+            value: String(teams?.count).padStart(2, "0"),
+            icon: Shield,
+        },
+
+        {
+            title: "Players",
+            value: String(players?.totalPlayers).padStart(2, "0"),
+            icon: Users,
+        },
+
+        {
+            title: "Owners",
+            value: String(owners?.totalOwners).padStart(2, "0"),
+            icon: UserPlus,
+        },
+    ];
+
     return (
         <div className="min-h-screen overflow-hidden bg-[#050816] text-white">
+
             <Navbar />
 
             {/* BACKGROUND */}
@@ -110,11 +150,11 @@ export default function AdminDashboard() {
 
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,193,7,0.08),transparent_35%)]" />
 
-                <div className="absolute top-0 left-0 h-[450px] w-[450px] rounded-full bg-yellow-500/10 blur-[180px]" />
+                <div className="absolute top-0 left-0 h-112.5 w-112.5 rounded-full bg-yellow-500/10 blur-[180px]" />
 
-                <div className="absolute bottom-0 right-0 h-[450px] w-[450px] rounded-full bg-orange-500/10 blur-[180px]" />
+                <div className="absolute bottom-0 right-0 h-112.5 w-112.5 rounded-full bg-orange-500/10 blur-[180px]" />
 
-                <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:70px_70px] opacity-20" />
+                <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-size:70px_70px] opacity-20" />
 
             </div>
 
@@ -161,18 +201,22 @@ export default function AdminDashboard() {
 
                             </div>
 
-                            <div
-                                className="
-                                rounded-full
-                                border border-green-500/20
-                                bg-green-500/10
-                                px-4 py-2
-                                text-sm font-semibold
-                                text-green-300
-                                "
-                            >
-                                Season 2026 Active
-                            </div>
+                            {latestSeason && (
+                                <div
+                                    className="
+                                    rounded-full
+                                    border border-green-500/20
+                                    bg-green-500/10
+                                    px-4 py-2
+                                    text-sm font-semibold
+                                    text-green-300
+                                    "
+                                >
+
+                                    {latestSeason.title} - {latestSeason.status}
+
+                                </div>
+                            )}
 
                         </div>
 
@@ -187,7 +231,7 @@ export default function AdminDashboard() {
                                     <span
                                         className="
                                         mt-2 block
-                                        bg-gradient-to-r
+                                        bg-linear-to-r
                                         from-yellow-300
                                         via-yellow-400
                                         to-orange-500
@@ -213,7 +257,7 @@ export default function AdminDashboard() {
                                     <Button
                                         className="
                                         h-12 rounded-2xl
-                                        bg-gradient-to-r
+                                        bg-linear-to-r
                                         from-yellow-300
                                         to-orange-400
                                         px-7
@@ -253,110 +297,191 @@ export default function AdminDashboard() {
 
                             <div
                                 className="
-                                rounded-3xl
-                                border border-white/10
-                                bg-[#11182f]
-                                p-6
-                                backdrop-blur-xl
-                                "
+    relative overflow-hidden
+    rounded-3xl
+    border border-white/10
+    bg-[#11182f]
+    p-6
+    backdrop-blur-xl
+    "
                             >
 
-                                <div className="flex items-center justify-between">
+                                {/* GLOW */}
 
-                                    <div>
+                                <div className="absolute inset-0 bg-linear-to-br from-yellow-400/5 via-transparent to-orange-500/5" />
 
-                                        <p className="text-sm font-medium text-white/60">
+                                {/* IF SEASON EXISTS */}
 
-                                            Current Season
+                                {latestSeason ? (
 
-                                        </p>
+                                    <div className="relative z-10">
 
-                                        <h2 className="mt-2 text-3xl font-black">
+                                        <div className="flex items-center justify-between">
 
-                                            Season 3
+                                            <div>
+
+                                                <p className="text-sm font-medium text-white/60">
+
+                                                    Current Season
+
+                                                </p>
+
+                                                <h2 className="mt-2 text-3xl font-black">
+
+                                                    {latestSeason.title}
+
+                                                </h2>
+
+                                            </div>
+
+                                            <div
+                                                className="
+                    rounded-2xl
+                    bg-yellow-400/10
+                    p-4
+                    text-yellow-400
+                    "
+                                            >
+                                                <Trophy size={32} />
+                                            </div>
+
+                                        </div>
+
+                                        <div className="mt-8 space-y-5">
+
+                                            <div className="grid grid-cols-2 gap-4">
+
+                                                <div className="rounded-2xl bg-white/5 p-4">
+
+                                                    <p className="text-sm font-medium text-white/60">
+
+                                                        Teams
+
+                                                    </p>
+
+                                                    <h3 className="mt-2 text-2xl font-bold">
+
+                                                        {latestSeason?.teams?.length || 0}
+
+                                                    </h3>
+
+                                                </div>
+
+                                                <div className="rounded-2xl bg-white/5 p-4">
+
+                                                    <p className="text-sm font-medium text-white/60">
+
+                                                        Players
+
+                                                    </p>
+
+                                                    <h3 className="mt-2 text-2xl font-bold">
+
+                                                        {latestSeason?.registeredPlayers?.length || 0}
+
+                                                    </h3>
+
+                                                </div>
+
+                                            </div>
+
+                                            <div
+                                                className="
+                    flex items-center justify-between
+                    rounded-2xl border border-green-500/20
+                    bg-green-500/10 px-4 py-3
+                    "
+                                            >
+
+                                                <div>
+
+                                                    <p className="text-xs text-green-200/70">
+
+                                                        Status
+
+                                                    </p>
+
+                                                    <p className="font-semibold text-green-300">
+
+                                                        {latestSeason.status}
+
+                                                    </p>
+
+                                                </div>
+
+                                                <Sparkles
+                                                    className="text-green-300"
+                                                    size={22}
+                                                />
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                ) : (
+
+                                    /* EMPTY STATE */
+
+                                    <div className="relative z-10 flex h-full flex-col items-center justify-center text-center">
+
+                                        <div
+                                            className="
+                flex h-24 w-24 items-center justify-center
+                rounded-full
+                border border-yellow-400/20
+                bg-yellow-400/10
+                text-yellow-400
+                shadow-lg shadow-yellow-500/20
+                "
+                                        >
+
+                                            <Calendar size={42} />
+
+                                        </div>
+
+                                        <h2 className="mt-8 text-3xl font-black">
+
+                                            No Season Yet
 
                                         </h2>
 
-                                    </div>
+                                        <p className="mt-4 max-w-sm text-sm leading-7 text-white/60">
 
-                                    <div
-                                        className="
-                                        rounded-2xl
-                                        bg-yellow-400/10
-                                        p-4
-                                        text-yellow-400
-                                        "
-                                    >
-                                        <Trophy size={32} />
-                                    </div>
+                                            Start your RPL tournament journey by creating the first season.
+                                            Manage teams, owners, players and auctions from one dashboard.
 
-                                </div>
+                                        </p>
 
-                                <div className="mt-8 space-y-5">
+                                        <Button
+                                            className="
+                mt-8 h-12 rounded-2xl
+                bg-linear-to-r
+                from-yellow-300
+                to-orange-400
+                px-8
+                font-bold
+                text-black
+                shadow-lg shadow-yellow-500/20
+                transition-all duration-300
+                hover:scale-105
+                hover:shadow-yellow-500/40
+                "
+                                        >
 
-                                    <div>
+                                            <Sparkles
+                                                size={18}
+                                                className="mr-2"
+                                            />
 
-                                        <div className="mb-2 flex items-center justify-between text-sm font-medium">
+                                            Create First Season
 
-                                            <span className="text-white/60">
-
-                                                Tournament Progress
-
-                                            </span>
-
-                                            <span className="text-yellow-300">
-
-                                                72%
-
-                                            </span>
-
-                                        </div>
-
-                                        <div className="h-3 overflow-hidden rounded-full bg-white/10">
-
-                                            <div className="h-full w-[72%] rounded-full bg-gradient-to-r from-yellow-300 to-orange-500" />
-
-                                        </div>
+                                        </Button>
 
                                     </div>
 
-                                    <div className="grid grid-cols-2 gap-4">
-
-                                        <div className="rounded-2xl bg-white/5 p-4">
-
-                                            <p className="text-sm font-medium text-white/60">
-
-                                                Matches
-
-                                            </p>
-
-                                            <h3 className="mt-2 text-2xl font-bold">
-
-                                                48
-
-                                            </h3>
-
-                                        </div>
-
-                                        <div className="rounded-2xl bg-white/5 p-4">
-
-                                            <p className="text-sm font-medium text-white/60">
-
-                                                Live Teams
-
-                                            </p>
-
-                                            <h3 className="mt-2 text-2xl font-bold">
-
-                                                12
-
-                                            </h3>
-
-                                        </div>
-
-                                    </div>
-
-                                </div>
+                                )}
 
                             </div>
 
@@ -379,9 +504,7 @@ export default function AdminDashboard() {
                             <Card
                                 key={item.title}
                                 className="
-                                group
-                                overflow-hidden
-                                rounded-3xl
+                                group overflow-hidden rounded-3xl
                                 border border-white/10
                                 bg-[#0f172d]
                                 backdrop-blur-xl
@@ -407,7 +530,7 @@ export default function AdminDashboard() {
 
                                             <h2 className="mt-3 text-5xl font-black text-white">
 
-                                                {item.value}
+                                                {isLoading ? "--" : item.value}
 
                                             </h2>
 
@@ -470,11 +593,18 @@ export default function AdminDashboard() {
 
                                 <Card
                                     key={item.title}
+                                    onClick={() => {
+
+                                        if (item.action === "OPEN_OWNER_MODAL") {
+                                            setOpenOwnerModal(true);
+                                        }
+
+                                        if (item.action === "OPEN_TEAM_MODAL") {
+                                            setOpenTeamModal(true);
+                                        }
+                                    }}
                                     className="
-                                    group
-                                    cursor-pointer
-                                    overflow-hidden
-                                    rounded-3xl
+                                    group cursor-pointer overflow-hidden rounded-3xl
                                     border border-white/10
                                     bg-[#0f172d]
                                     backdrop-blur-xl
@@ -490,12 +620,9 @@ export default function AdminDashboard() {
 
                                         <div
                                             className="
-                                            flex h-16 w-16
-                                            items-center justify-center
-                                            rounded-3xl
-                                            border border-yellow-400/20
-                                            bg-yellow-400/10
-                                            text-yellow-400
+                                            flex h-16 w-16 items-center justify-center
+                                            rounded-3xl border border-yellow-400/20
+                                            bg-yellow-400/10 text-yellow-400
                                             transition-transform duration-300
                                             group-hover:scale-110
                                             "
@@ -518,8 +645,7 @@ export default function AdminDashboard() {
                                         <div
                                             className="
                                             mt-6 flex items-center gap-2
-                                            text-sm font-semibold
-                                            text-yellow-400
+                                            text-sm font-semibold text-yellow-400
                                             "
                                         >
 
@@ -543,7 +669,7 @@ export default function AdminDashboard() {
 
                 </div>
 
-                {/* TABLE + ACTIVITY */}
+                {/* SEASONS + ACTIVITY */}
 
                 <div className="mt-14 grid gap-8 xl:grid-cols-3">
 
@@ -551,8 +677,7 @@ export default function AdminDashboard() {
 
                     <Card
                         className="
-                        overflow-hidden
-                        rounded-3xl
+                        overflow-hidden rounded-3xl
                         border border-white/10
                         bg-[#0f172d]
                         backdrop-blur-xl
@@ -570,8 +695,7 @@ export default function AdminDashboard() {
                                         className="
                                         rounded-2xl
                                         bg-yellow-400/10
-                                        p-3
-                                        text-yellow-400
+                                        p-3 text-yellow-400
                                         "
                                     >
                                         <Calendar size={22} />
@@ -599,21 +723,17 @@ export default function AdminDashboard() {
 
                             <div className="space-y-5">
 
-                                {seasons.map((season) => (
+                                {seasons.map((season: Season) => (
 
                                     <div
-                                        key={season.season}
+                                        key={season._id}
                                         className="
-                                        flex flex-col gap-5
-                                        rounded-3xl
+                                        flex flex-col gap-5 rounded-3xl
                                         border border-white/10
                                         bg-[#11182f]
-                                        p-5
-                                        transition-all duration-300
+                                        p-5 transition-all duration-300
                                         hover:border-yellow-400/20
-                                        md:flex-row
-                                        md:items-center
-                                        md:justify-between
+                                        md:flex-row md:items-center md:justify-between
                                         "
                                     >
 
@@ -621,15 +741,17 @@ export default function AdminDashboard() {
 
                                             <h3 className="text-lg font-bold text-white">
 
-                                                {season.season}
+                                                {season.title}
 
                                             </h3>
 
                                             <p className="mt-2 text-sm font-medium text-white/60">
 
-                                                Teams: {season.teams}
+                                                Teams: {season.teams?.length || 0}
                                                 {" • "}
-                                                Players: {season.players}
+                                                Players: {season.registeredPlayers?.length || 0}
+                                                {" • "}
+                                                Owners: {season.owners?.length || 0}
 
                                             </p>
 
@@ -639,14 +761,14 @@ export default function AdminDashboard() {
 
                                             <div
                                                 className={`
-                                                rounded-full
-                                                border
-                                                px-5 py-2
+                                                rounded-full border px-5 py-2
                                                 text-sm font-semibold
 
-                                                ${season.status === "Active"
+                                                ${season.status === "LIVE"
                                                         ? "border-green-500/20 bg-green-500/10 text-green-300"
-                                                        : "border-blue-500/20 bg-blue-500/10 text-blue-300"
+                                                        : season.status === "COMPLETED"
+                                                            ? "border-blue-500/20 bg-blue-500/10 text-blue-300"
+                                                            : "border-yellow-500/20 bg-yellow-500/10 text-yellow-300"
                                                     }
                                                 `}
                                             >
@@ -656,6 +778,11 @@ export default function AdminDashboard() {
                                             </div>
 
                                             <Button
+                                                onClick={() =>
+                                                    navigate(
+                                                        `/admin/seasons/${season._id}/control-center`
+                                                    )
+                                                }
                                                 size="sm"
                                                 variant="ghost"
                                                 className="rounded-xl text-white/70 hover:bg-white/10 hover:text-white"
@@ -679,8 +806,7 @@ export default function AdminDashboard() {
 
                     <Card
                         className="
-                        overflow-hidden
-                        rounded-3xl
+                        overflow-hidden rounded-3xl
                         border border-white/10
                         bg-[#0f172d]
                         backdrop-blur-xl
@@ -695,8 +821,7 @@ export default function AdminDashboard() {
                                     className="
                                     rounded-2xl
                                     bg-yellow-400/10
-                                    p-3
-                                    text-yellow-400
+                                    p-3 text-yellow-400
                                     "
                                 >
                                     <Clock3 size={22} />
@@ -727,8 +852,7 @@ export default function AdminDashboard() {
                                     <div
                                         key={item}
                                         className="
-                                        flex gap-4
-                                        rounded-2xl
+                                        flex gap-4 rounded-2xl
                                         border border-white/5
                                         bg-[#11182f]
                                         p-4
@@ -739,14 +863,15 @@ export default function AdminDashboard() {
                                             className="
                                             mt-1 flex h-9 w-9
                                             items-center justify-center
-                                            rounded-full
-                                            bg-yellow-400/10
+                                            rounded-full bg-yellow-400/10
                                             "
                                         >
+
                                             <CircleDot
                                                 size={16}
                                                 className="text-yellow-400"
                                             />
+
                                         </div>
 
                                         <div>
@@ -778,6 +903,15 @@ export default function AdminDashboard() {
                 </div>
 
             </div>
+            <RegisterDialog
+                open={openOwnerModal}
+                onOpenChange={setOpenOwnerModal}
+                defaultRole="OWNER"
+            />
+            <CreateTeamDialog
+                open={openTeamModal}
+                onOpenChange={setOpenTeamModal}
+            />
 
         </div>
     );
