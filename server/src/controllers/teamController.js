@@ -6,6 +6,7 @@ import Team from "../models/Team.js";
 import Owner from "../models/Owner.js";
 import Player from "../models/Player.js";
 import Season from "../models/Season.js";
+import { uploadToCloudinary } from "../utils/cloudinaryUpload.js";
 
 // ======================================================
 // CREATE TEAM
@@ -13,13 +14,20 @@ import Season from "../models/Season.js";
 
 export const createTeam = async (req, res) => {
   try {
-    const { name, logo, ownerName, maxPlayers, season } = req.body;
+    const { name, ownerName, maxPlayers, season } = req.body;
 
     // Validation
     if (!name || !ownerName || !season) {
       return res.status(400).json({
         success: false,
         message: "Name, owner and season are required",
+      });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "Profile image is required",
       });
     }
 
@@ -53,14 +61,28 @@ export const createTeam = async (req, res) => {
       });
     }
 
+    const uploadedImage = await uploadToCloudinary(req.file.buffer);
+
     // Create team
     const team = await Team.create({
       name,
-      logo,
+      profileImage: uploadedImage.secure_url,
       ownerName,
       maxPlayers,
       season,
     });
+
+    await Season.findByIdAndUpdate(
+      season,
+      {
+        $push: {
+          teams: team._id,
+        },
+      },
+      {
+        new: true,
+      },
+    );
 
     res.status(201).json({
       success: true,
