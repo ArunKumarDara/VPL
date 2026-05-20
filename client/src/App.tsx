@@ -6,6 +6,9 @@ import TeamsPage from "./pages/TeamPage"
 import PlayersPage from "./pages/PlayerPage"
 import MatchesPage from "./pages/MatchesPage"
 import AuctionPage from "./pages/AuctionPage"
+import PlayerHomePage from "./pages/PlayerHomePage";
+import AdminDashboard from "./adminDashboard/AdminDashboard";
+
 
 export default function App() {
   return (
@@ -15,6 +18,8 @@ export default function App() {
       <Route path="/players" element={<PlayersPage />} />
       <Route path="/matches" element={<MatchesPage />} />
       <Route path="/auction" element={<AuctionPage />} />
+      <Route path="/player" element={<PlayerHomePage />} />
+      <Route path="/admin" element={<AdminDashboard />} />
     </Routes>
   );
 }
