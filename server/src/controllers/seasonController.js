@@ -1,5 +1,7 @@
 // controllers/seasonController.js
 
+import mongoose from "mongoose";
+
 import Season from "../models/Season.js";
 
 // ======================================================
@@ -15,9 +17,14 @@ export const createSeason = async (req, res) => {
       tournamentStartDate,
       tournamentEndDate,
       status,
+      registeredPlayers,
+      owners,
+      teams,
+      players,
     } = req.body;
 
-    // Validation
+    // VALIDATION
+
     if (!title || !year) {
       return res.status(400).json({
         success: false,
@@ -25,7 +32,8 @@ export const createSeason = async (req, res) => {
       });
     }
 
-    // Prevent duplicate year season
+    // CHECK DUPLICATE YEAR
+
     const existingSeason = await Season.findOne({
       year,
     });
@@ -37,7 +45,8 @@ export const createSeason = async (req, res) => {
       });
     }
 
-    // Create season
+    // CREATE SEASON
+
     const season = await Season.create({
       title,
       year,
@@ -45,6 +54,10 @@ export const createSeason = async (req, res) => {
       tournamentStartDate,
       tournamentEndDate,
       status,
+      registeredPlayers: registeredPlayers || [],
+      owners: owners || [],
+      teams: teams || [],
+      players: players || [],
     });
 
     return res.status(201).json({
@@ -66,10 +79,13 @@ export const createSeason = async (req, res) => {
 
 export const getAllSeasons = async (req, res) => {
   try {
-    const seasons = await Season.find().sort({
-      year: -1,
-    });
-
+    const seasons = await Season.find()
+      .populate("registeredPlayers")
+      .populate("owners")
+      .populate("teams")
+      .sort({
+        year: -1,
+      });
     return res.status(200).json({
       success: true,
       totalSeasons: seasons.length,
@@ -91,7 +107,26 @@ export const getSingleSeason = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const season = await Season.findById(id);
+    // VALID OBJECT ID
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid season id",
+      });
+    }
+
+    const season = await Season.findById(id)
+      .populate("registeredPlayers")
+      .populate({
+        path: "owners",
+        populate: {
+          path: "team",
+        },
+      })
+      .populate("teams");
+
+    console.log(season);
 
     if (!season) {
       return res.status(404).json({
@@ -120,6 +155,15 @@ export const updateSeason = async (req, res) => {
   try {
     const { id } = req.params;
 
+    // VALID OBJECT ID
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid season id",
+      });
+    }
+
     const season = await Season.findById(id);
 
     if (!season) {
@@ -129,10 +173,38 @@ export const updateSeason = async (req, res) => {
       });
     }
 
-    const updatedSeason = await Season.findByIdAndUpdate(id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    // PREVENT DUPLICATE YEAR
+
+    if (req.body.year) {
+      const existingSeason = await Season.findOne({
+        year: req.body.year,
+        _id: {
+          $ne: id,
+        },
+      });
+
+      if (existingSeason) {
+        return res.status(400).json({
+          success: false,
+          message: "Another season already exists for this year",
+        });
+      }
+    }
+
+    const updatedSeason = await Season.findByIdAndUpdate(
+      id,
+      {
+        ...req.body,
+      },
+      {
+        new: true,
+        runValidators: true,
+      },
+    )
+      .populate("registeredPlayers")
+      .populate("owners")
+      .populate("teams")
+      .populate("players");
 
     return res.status(200).json({
       success: true,
@@ -154,6 +226,15 @@ export const updateSeason = async (req, res) => {
 export const deleteSeason = async (req, res) => {
   try {
     const { id } = req.params;
+
+    // VALID OBJECT ID
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid season id",
+      });
+    }
 
     const season = await Season.findById(id);
 
@@ -188,13 +269,23 @@ export const updateSeasonStatus = async (req, res) => {
 
     const { status } = req.body;
 
-    // Validation
+    // VALID STATUS
+
     const allowedStatus = ["UPCOMING", "LIVE", "COMPLETED"];
 
     if (!allowedStatus.includes(status)) {
       return res.status(400).json({
         success: false,
         message: "Invalid season status",
+      });
+    }
+
+    // VALID OBJECT ID
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid season id",
       });
     }
 
@@ -214,6 +305,135 @@ export const updateSeasonStatus = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Season status updated",
+      season,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// ======================================================
+// ADD OWNER TO SEASON
+// ======================================================
+
+export const addOwnerToSeason = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const { ownerId } = req.body;
+
+    const season = await Season.findById(id);
+
+    if (!season) {
+      return res.status(404).json({
+        success: false,
+        message: "Season not found",
+      });
+    }
+
+    if (season.owners.includes(ownerId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Owner already added to season",
+      });
+    }
+
+    season.owners.push(ownerId);
+
+    await season.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Owner added to season successfully",
+      season,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// ======================================================
+// ADD TEAM TO SEASON
+// ======================================================
+
+export const addTeamToSeason = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const { teamId } = req.body;
+
+    const season = await Season.findById(id);
+
+    if (!season) {
+      return res.status(404).json({
+        success: false,
+        message: "Season not found",
+      });
+    }
+
+    if (season.teams.includes(teamId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Team already added to season",
+      });
+    }
+
+    season.teams.push(teamId);
+
+    await season.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Team added to season successfully",
+      season,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// ======================================================
+// ADD PLAYER TO SEASON
+// ======================================================
+
+export const addPlayerToSeason = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const { playerId } = req.body;
+
+    const season = await Season.findById(id);
+
+    if (!season) {
+      return res.status(404).json({
+        success: false,
+        message: "Season not found",
+      });
+    }
+
+    if (season.players.includes(playerId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Player already added to season",
+      });
+    }
+
+    season.players.push(playerId);
+
+    await season.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Player added to season successfully",
       season,
     });
   } catch (error) {
