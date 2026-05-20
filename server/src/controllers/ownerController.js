@@ -3,6 +3,7 @@
 import Owner from "../models/Owner.js";
 import Team from "../models/Team.js";
 import Player from "../models/Player.js";
+import Season from "../models/Season.js";
 
 import { uploadToCloudinary } from "../utils/cloudinaryUpload.js";
 
@@ -40,6 +41,15 @@ export const createOwner = async (req, res) => {
       });
     }
 
+    const existingSeason = await Season.findById(season);
+
+    if (!existingSeason) {
+      return res.status(404).json({
+        success: false,
+        message: "Season not found",
+      });
+    }
+
     const uploadedImage = await uploadToCloudinary(req.file.buffer);
 
     const owner = await Owner.create({
@@ -50,6 +60,18 @@ export const createOwner = async (req, res) => {
       purseValue,
       season,
     });
+
+    await Season.findByIdAndUpdate(
+      season,
+      {
+        $push: {
+          owners: owner._id,
+        },
+      },
+      {
+        new: true,
+      },
+    );
 
     return res.status(201).json({
       success: true,
@@ -75,7 +97,7 @@ export const getAllOwners = async (req, res) => {
       .populate("team")
       .populate("boughtPlayers")
       .populate("season");
-
+    console.log(owners);
     return res.status(200).json({
       success: true,
       totalOwners: owners.length,
