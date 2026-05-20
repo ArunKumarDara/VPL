@@ -79,7 +79,7 @@ export default function Navbar() {
 
         if (
             user?.role === "ADMIN" &&
-            location.pathname !== "/admin"
+            !location.pathname.startsWith("/admin")
         ) {
 
             navigate("/admin", {
@@ -92,7 +92,7 @@ export default function Navbar() {
 
         if (
             user?.role === "OWNER" &&
-            location.pathname !== "/owner"
+            !location.pathname.startsWith("/owner")
         ) {
 
             navigate("/owner", {
@@ -106,7 +106,6 @@ export default function Navbar() {
         location.pathname,
         navigate,
     ]);
-
     const handleLogout =
         () => {
 
