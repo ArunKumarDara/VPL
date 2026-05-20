@@ -12,6 +12,20 @@ import {
 import { toast } from "sonner";
 
 import Navbar from "@/components/Navbar";
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+} from "@/components/ui/command";
+
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
 
 import {
     Trophy,
@@ -25,6 +39,7 @@ import {
     Crown,
     Loader2,
     Timer,
+    Search
 } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -56,6 +71,15 @@ export default function SeasonControlCenter() {
     const [ownerPurses, setOwnerPurses] = useState<
         Record<string, number>
     >({});
+
+    const [playerSearch, setPlayerSearch] =
+        useState("");
+
+    const [filteredAuctionPlayers, setFilteredAuctionPlayers] =
+        useState<any[]>([]);
+
+    const [searchOpen, setSearchOpen] =
+        useState(false);
 
     const [activeTab, setActiveTab] = useState<
         "owners" | "players"
@@ -149,6 +173,27 @@ export default function SeasonControlCenter() {
             : allPlayers.length) /
         ITEMS_PER_PAGE,
     );
+
+    useEffect(() => {
+        if (!playerSearch.trim()) {
+            setFilteredAuctionPlayers(
+                auctionPlayers,
+            );
+
+            return;
+        }
+
+        const filtered =
+            auctionPlayers.filter((player: any) =>
+                player.name
+                    ?.toLowerCase()
+                    .includes(
+                        playerSearch.toLowerCase(),
+                    ),
+            );
+
+        setFilteredAuctionPlayers(filtered);
+    }, [playerSearch, auctionPlayers]);
 
     useEffect(() => {
         setCurrentPage(1);
@@ -705,7 +750,156 @@ export default function SeasonControlCenter() {
                                         Make sure to register more players for this season.
                                     </p>
                                 </div>
-                            ) : (
+                            ) : (<div>
+                                <Card className="mb-2 border border-white/10 bg-[#0d1326]">
+                                    <CardContent className="p-1">
+                                        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                                            <div>
+                                                <h2 className="text-xl font-black text-white">
+                                                    Auction Player Picker
+                                                </h2>
+
+                                                <p className="mt-1 text-sm text-white/50">
+                                                    Search and select player for cheeti auction
+                                                </p>
+                                            </div>
+
+                                            <Popover
+                                                open={searchOpen}
+                                                onOpenChange={setSearchOpen}
+                                            >
+                                                <PopoverTrigger asChild>
+                                                    <Button
+                                                        variant="outline"
+                                                        className="h-12 w-full border-white/10 bg-[#111827] text-white hover:bg-[#1b2336] md:w-[320px]"
+                                                    >
+                                                        <Search className="mr-2 h-2 w-4" />
+
+                                                        {currentAuctionPlayer?.name ||
+                                                            "Search auction player"}
+                                                    </Button>
+                                                </PopoverTrigger>
+
+                                                <PopoverContent
+                                                    className="w-[320px] border border-white/10 bg-[#0d1326] p-0"
+                                                    align="end"
+                                                >
+                                                    <Command className="bg-[#0d1326] text-white">
+                                                        <CommandInput
+                                                            placeholder="Search player..."
+                                                            value={playerSearch}
+                                                            onValueChange={
+                                                                setPlayerSearch
+                                                            }
+                                                            className="border-b border-white/10"
+                                                        />
+
+                                                        <CommandList>
+                                                            {playerSearch.trim().length > 0 && (
+                                                                <>
+                                                                    <CommandEmpty>
+                                                                        No player found.
+                                                                    </CommandEmpty>
+
+                                                                    <CommandGroup heading="Auction Players">
+                                                                        {filteredAuctionPlayers.map(
+                                                                            (
+                                                                                player: any,
+                                                                                index: number,
+                                                                            ) => (
+                                                                                <CommandItem
+                                                                                    key={
+                                                                                        player._id
+                                                                                    }
+                                                                                    value={
+                                                                                        player.name
+                                                                                    }
+                                                                                    onSelect={() => {
+                                                                                        const realIndex =
+                                                                                            auctionPlayers.findIndex(
+                                                                                                (
+                                                                                                    p: any,
+                                                                                                ) =>
+                                                                                                    p._id ===
+                                                                                                    player._id,
+                                                                                            );
+
+                                                                                        setAuctionIndex(
+                                                                                            realIndex,
+                                                                                        );
+
+                                                                                        setCurrentBid(
+                                                                                            player.basePrice ||
+                                                                                            0,
+                                                                                        );
+
+                                                                                        setSoldTo(
+                                                                                            "",
+                                                                                        );
+
+                                                                                        setSelectedOwnerId(
+                                                                                            "",
+                                                                                        );
+
+                                                                                        setAuctionTimer(
+                                                                                            180,
+                                                                                        );
+
+                                                                                        setSearchOpen(
+                                                                                            false,
+                                                                                        );
+
+                                                                                        toast.success(
+                                                                                            `${player.name} selected for auction`,
+                                                                                        );
+                                                                                    }}
+                                                                                    className="cursor-pointer border-b border-white/5 px-3 py-3 text-white hover:bg-[#1b2336]"
+                                                                                >
+                                                                                    <div className="flex w-full items-center justify-between">
+                                                                                        <div className="flex items-center gap-3">
+                                                                                            <Avatar className="h-10 w-10 rounded-xl">
+                                                                                                <AvatarImage
+                                                                                                    src={
+                                                                                                        player.profileImage
+                                                                                                    }
+                                                                                                />
+                                                                                            </Avatar>
+
+                                                                                            <div>
+                                                                                                <p className="font-bold">
+                                                                                                    {
+                                                                                                        player.name
+                                                                                                    }
+                                                                                                </p>
+
+                                                                                                <p className="text-xs text-white/50">
+                                                                                                    {
+                                                                                                        player.playingRole
+                                                                                                    }
+                                                                                                </p>
+                                                                                            </div>
+                                                                                        </div>
+
+                                                                                        <div className="text-sm font-black text-yellow-300">
+                                                                                            ₹
+                                                                                            {
+                                                                                                player.basePrice
+                                                                                            }
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </CommandItem>
+                                                                            )
+                                                                        )}
+                                                                    </CommandGroup>
+                                                                </>
+                                                            )}
+                                                        </CommandList>
+                                                    </Command>
+                                                </PopoverContent>
+                                            </Popover>
+                                        </div>
+                                    </CardContent>
+                                </Card>
                                 <div className="flex flex-col gap-8 lg:flex-row">
                                     <img
                                         src={
@@ -871,6 +1065,7 @@ export default function SeasonControlCenter() {
                                         </div>
                                     </div>
                                 </div>
+                            </div>
                             )}
                         </CardContent>
                     </Card>
