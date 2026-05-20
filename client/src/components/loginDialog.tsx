@@ -1,13 +1,11 @@
-// components/LoginDialog.tsx
-
 import {
     Dialog,
     DialogContent,
 } from "@/components/ui/dialog";
 
 import { Button } from "@/components/ui/button";
-
 import { Input } from "@/components/ui/input";
+import { AxiosError } from "axios";
 
 import {
     ShieldCheck,
@@ -18,9 +16,27 @@ import {
     ArrowRight,
     Sparkles,
     Trophy,
+    Loader2,
 } from "lucide-react";
 
-import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { useMutation } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+import { login as loginApi } from "@/services/auth/authService";
+import { useAuthStore } from "@/store/authStore";
+import React, {
+    useState,
+    ReactNode,
+    useEffect,
+} from "react";
+
+// ======================================================
+// TYPES
+// ======================================================
 
 type Props = {
     open: boolean;
@@ -32,11 +48,41 @@ type Role =
     | "owner"
     | "admin";
 
+const loginSchema = z.object({
+    mobile: z
+        .string()
+        .trim()
+        .transform((value) => value.replace(/\D/g, "")) // remove non-digits
+        .refine(
+            (value) => value.length === 10,
+            {
+                message:
+                    "Enter a valid 10-digit mobile number",
+            }
+        ),
+
+    password: z.string().optional(),
+});
+type LoginForm = z.infer<typeof loginSchema>;
+
+type LoginResponse = {
+    success: boolean;
+    token: string;
+
+    user: {
+        _id: string;
+        name: string;
+        role: "PLAYER" | "OWNER" | "ADMIN";
+        profileImage: string;
+        mobile: string;
+    };
+};
+
 type RoleCardProps = {
     active: boolean;
     title: string;
     subtitle: string;
-    icon: React.ReactNode;
+    icon: ReactNode;
     onClick: () => void;
     activeClass:
     | "yellow"
@@ -44,26 +90,139 @@ type RoleCardProps = {
     | "purple";
 };
 
+type ApiError = AxiosError<{
+    message?: string;
+}>;
+
+// ======================================================
+// COMPONENT
+// ======================================================
+
 export default function LoginDialog({
     open,
     onOpenChange,
 }: Props) {
+
     const [role, setRole] =
         useState<Role>("player");
 
+    const navigate =
+        useNavigate();
+
+    const authLogin =
+        useAuthStore(
+            (state) => state.login
+        );
+
+    const {
+        register,
+        handleSubmit,
+        reset,
+        formState: { errors },
+    } = useForm<LoginForm>({
+        resolver: zodResolver(loginSchema),
+    });
+
+    useEffect(() => {
+        if (open) {
+            reset({
+                mobile: "",
+                password: "",
+            });
+        }
+    }, [open, reset]);
+
+    // ======================================================
+    // LOGIN MUTATION
+    // ======================================================
+
+    const loginMutation =
+        useMutation({
+
+            mutationFn: loginApi,
+
+            onSuccess: (
+                data: LoginResponse
+            ) => {
+
+                authLogin(
+                    data.user,
+                    data.token
+                );
+
+                toast.success(
+                    "Login Successful 🎉"
+                );
+
+                onOpenChange(false);
+
+                // navigate according to role
+
+                switch (
+                data.user.role
+                ) {
+
+                    case "PLAYER":
+                        navigate(
+                            "/player"
+                        );
+                        break;
+
+                    case "OWNER":
+                        navigate(
+                            "/owner"
+                        );
+                        break;
+
+                    case "ADMIN":
+                        navigate(
+                            "/admin"
+                        );
+                        break;
+                }
+            },
+
+            onError: (
+                error: ApiError
+            ) => {
+
+                toast.error(
+                    error?.response
+                        ?.data
+                        ?.message ||
+                    "Login failed"
+                );
+            },
+        });
+
+    // ======================================================
+    // SUBMIT
+    // ======================================================
+
+    const onSubmit = (values: LoginForm) => {
+        loginMutation.mutate({
+            mobile: values.mobile,
+            password:
+                role === "player"
+                    ? ""
+                    : values.password ?? "",
+        });
+    };
+
     return (
+
         <Dialog
             open={open}
             onOpenChange={onOpenChange}
         >
+
             <DialogContent className="max-h-[95vh] overflow-y-auto border border-white/10 bg-[#07111F] p-0 text-white sm:max-w-5xl">
+
                 <div className="grid lg:grid-cols-2">
 
                     {/* LEFT SIDE */}
 
                     <div className="relative overflow-hidden bg-[#0A0F1C] p-6 lg:p-10">
-
-                        {/* YELLOW PATTERN */}
 
                         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(250,204,21,0.25),transparent_35%)]" />
 
@@ -71,28 +230,27 @@ export default function LoginDialog({
 
                         <div className="absolute right-0 top-0 size-52 rounded-full bg-orange-500/10 blur-3xl" />
 
-                        {/* LOGO */}
-
                         <div className="relative z-10 flex items-center gap-4">
 
                             <div className="flex size-16 items-center justify-center rounded-3xl bg-yellow-400 text-black shadow-2xl">
 
                                 <Trophy size={30} />
+
                             </div>
 
                             <div>
 
-                                <h2 className="text-4xl font-black tracking-tight text-white">
+                                <h2 className="text-4xl font-black">
                                     RPL 2026
                                 </h2>
 
-                                <p className="mt-1 text-xs font-bold uppercase tracking-[0.4em] text-yellow-400">
+                                <p className="text-xs font-bold uppercase tracking-[0.4em] text-yellow-400">
                                     Login Portal
                                 </p>
-                            </div>
-                        </div>
 
-                        {/* CONTENT */}
+                            </div>
+
+                        </div>
 
                         <div className="relative z-10 mt-14">
 
@@ -101,25 +259,22 @@ export default function LoginDialog({
                                 <Sparkles size={16} />
 
                                 Redfort Premier League
+
                             </div>
 
-                            <h3 className="mt-6 text-4xl font-black leading-tight text-white sm:text-5xl">
+                            <h3 className="mt-6 text-5xl font-black">
 
                                 Access The
 
                                 <span className="block bg-linear-to-r from-yellow-300 via-yellow-400 to-orange-500 bg-clip-text text-transparent">
+
                                     RPL Dashboard
+
                                 </span>
+
                             </h3>
 
-                            <p className="mt-6 max-w-lg text-base leading-8 text-white/65">
-                                Login as a player, owner, or admin
-                                to access auctions, team management,
-                                player stats, and tournament updates.
-                            </p>
                         </div>
-
-                        {/* STATS */}
 
                     </div>
 
@@ -127,122 +282,114 @@ export default function LoginDialog({
 
                     <div className="bg-[#0B1120] p-6 sm:p-8">
 
-                        {/* TOP */}
+                        <div className="mb-6 grid grid-cols-3 gap-3">
 
-                        <div className="mb-8">
+                            <RoleCard
+                                active={role === "player"}
+                                title="Player"
+                                subtitle="Join Team"
+                                icon={<User size={22} />}
+                                activeClass="yellow"
+                                onClick={() =>
+                                    setRole("player")
+                                }
+                            />
 
-                            <div className="mb-6 grid grid-cols-3 gap-3">
+                            <RoleCard
+                                active={role === "owner"}
+                                title="Owner"
+                                subtitle="Manage Team"
+                                icon={<Users size={22} />}
+                                activeClass="blue"
+                                onClick={() =>
+                                    setRole("owner")
+                                }
+                            />
 
-                                <RoleCard
-                                    active={
-                                        role === "player"
-                                    }
-                                    title="Player"
-                                    subtitle="Join Team"
-                                    icon={
-                                        <User size={22} />
-                                    }
-                                    activeClass="yellow"
-                                    onClick={() =>
-                                        setRole("player")
-                                    }
-                                />
+                            <RoleCard
+                                active={role === "admin"}
+                                title="Admin"
+                                subtitle="Control"
+                                icon={<ShieldCheck size={22} />}
+                                activeClass="purple"
+                                onClick={() =>
+                                    setRole("admin")
+                                }
+                            />
 
-                                <RoleCard
-                                    active={
-                                        role === "owner"
-                                    }
-                                    title="Owner"
-                                    subtitle="Manage Team"
-                                    icon={
-                                        <Users size={22} />
-                                    }
-                                    activeClass="blue"
-                                    onClick={() =>
-                                        setRole("owner")
-                                    }
-                                />
-
-                                <RoleCard
-                                    active={
-                                        role === "admin"
-                                    }
-                                    title="Admin"
-                                    subtitle="Control"
-                                    icon={
-                                        <ShieldCheck size={22} />
-                                    }
-                                    activeClass="purple"
-                                    onClick={() =>
-                                        setRole("admin")
-                                    }
-                                />
-                            </div>
-
-                            <div>
-
-                                <h3 className="text-3xl font-black">
-                                    Login Now
-                                </h3>
-
-                                <p className="mt-2 text-sm text-white/60">
-                                    Enter your credentials to continue
-                                </p>
-                            </div>
                         </div>
 
-                        {/* FORM */}
+                        <form
+                            onSubmit={handleSubmit(onSubmit)}
+                            className="space-y-5"
+                        >
 
-                        <div className="space-y-5">
-
-                            {/* PHONE */}
-
-                            <div>
-
-                                <p className="mb-2 text-sm font-semibold text-white/70">
-                                    Phone Number
-                                </p>
+                            <div className="space-y-2">
 
                                 <div className="relative">
 
-                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40">
-                                        <Phone size={18} />
-                                    </div>
+                                    <Phone
+                                        size={18}
+                                        className="absolute left-4 top-4 text-white/50 z-10"
+                                    />
 
                                     <Input
+                                        {...register("mobile")}
+                                        type="tel"
+                                        maxLength={10}
                                         placeholder="Enter mobile number"
-                                        className="h-13 rounded-xl border-white/10 bg-white/5 pl-12 text-white placeholder:text-white/30"
+                                        autoComplete="off"
+                                        className={`
+            h-13 rounded-xl bg-white/5 pl-12
+            text-white placeholder:text-white/40
+            ${errors.mobile
+                                                ? "border-red-500 focus-visible:ring-red-500"
+                                                : "border-white/10"
+                                            }
+            `}
                                     />
+
                                 </div>
+
+                                {errors.mobile && (
+                                    <p className="text-xs text-red-400 ml-1">
+                                        {errors.mobile.message}
+                                    </p>
+                                )}
+
                             </div>
 
-                            {/* PASSWORD */}
-
                             {role !== "player" && (
-                                <div>
 
-                                    <p className="mb-2 text-sm font-semibold text-white/70">
-                                        Password
-                                    </p>
+                                <div className="space-y-2">
 
                                     <div className="relative">
 
-                                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40">
-                                            <Lock size={18} />
-                                        </div>
+                                        <Lock
+                                            size={18}
+                                            className="absolute left-4 top-4 text-white/50 z-10"
+                                        />
 
                                         <Input
                                             type="password"
+                                            {...register("password")}
                                             placeholder="Enter password"
-                                            className="h-13 rounded-xl border-white/10 bg-white/5 pl-12 text-white placeholder:text-white/30"
+                                            autoComplete="new-password"
+                                            className="h-13 rounded-xl border-white/10 bg-white/5 pl-12 text-white placeholder:text-white/40"
                                         />
+
                                     </div>
+
+                                    {errors.password && (
+                                        <p className="text-xs text-red-400 ml-1">
+                                            {errors.password.message}
+                                        </p>
+                                    )}
+
                                 </div>
+
                             )}
-
-                            {/* BUTTONS */}
-
-                            <div className="mt-6 flex gap-4">
+                            <div className="mt-8 flex gap-4">
 
                                 <Button
                                     type="button"
@@ -250,39 +397,90 @@ export default function LoginDialog({
                                     onClick={() =>
                                         onOpenChange(false)
                                     }
-                                    className="h-13 flex-1 rounded-xl border-white/10 bg-white/5 text-white hover:bg-white/10"
+                                    className="
+        h-13 flex-1 rounded-2xl
+        border border-white/10
+        bg-white/5
+        text-white
+        backdrop-blur-xl
+        transition-all duration-300
+        hover:scale-[1.02]
+        hover:bg-white/10
+        hover:border-white/20
+        "
                                 >
                                     Cancel
                                 </Button>
 
-                                <Button className="group h-13 flex-1 rounded-xl bg-yellow-400 font-bold text-black transition-all duration-300 hover:scale-[1.02] hover:bg-yellow-500">
-                                    Continue
+                                <Button
+                                    type="submit"
+                                    disabled={
+                                        loginMutation.isPending
+                                    }
+                                    className="
+        group h-13 flex-1 rounded-2xl
+        bg-linear-to-r
+        from-yellow-300
+        via-yellow-400
+        to-orange-400
+        font-bold
+        text-black
+        shadow-[0_0_25px_rgba(250,204,21,0.35)]
+        transition-all duration-300
+        hover:scale-[1.02]
+        hover:shadow-[0_0_40px_rgba(250,204,21,0.6)]
+        disabled:opacity-70
+        disabled:hover:scale-100
+        "
+                                >
 
-                                    <ArrowRight
-                                        size={18}
-                                        className="ml-2 transition-transform duration-300 group-hover:translate-x-1"
-                                    />
+                                    {loginMutation.isPending ? (
+
+                                        <Loader2
+                                            size={20}
+                                            className="animate-spin"
+                                        />
+
+                                    ) : (
+
+                                        <div className="flex items-center gap-2">
+
+                                            <span>
+                                                Continue
+                                            </span>
+
+                                            <ArrowRight
+                                                size={18}
+                                                className="
+                    transition-transform
+                    duration-300
+                    group-hover:translate-x-1
+                    "
+                                            />
+
+                                        </div>
+
+                                    )}
+
                                 </Button>
+
                             </div>
 
-                            {/* FOOTER */}
+                        </form>
 
-                            <p className="pt-2 text-center text-xs leading-6 text-white/35">
-                                Secure access to the official
-                                Redfort Premier League management
-                                portal.
-                            </p>
-                        </div>
                     </div>
+
                 </div>
+
             </DialogContent>
+
         </Dialog>
     );
 }
 
-/* ====================================================== */
-/* ROLE CARD */
-/* ====================================================== */
+// ======================================================
+// ROLE CARD
+// ======================================================
 
 function RoleCard({
     active,
@@ -327,56 +525,73 @@ function RoleCard({
     };
 
     return (
+
         <button
             type="button"
             onClick={onClick}
-            className={`group relative overflow-hidden rounded-2xl border p-4 transition-all duration-300 hover:scale-[1.02]
+            className={`group relative overflow-hidden rounded-2xl border p-4
+            transition-all duration-300 hover:scale-[1.03]
 
-      ${active
-                    ? activeStyles[
-                    activeClass
-                    ]
-                    : "border-white/10 bg-white/5"
-                }
-      `}
+            ${active
+                    ? activeStyles[activeClass]
+                    : "border-white/10 bg-white/5 hover:bg-white/10"
+                }`}
         >
-            <div className="relative z-10 flex flex-col items-center gap-2">
+
+            {/* glow effect */}
+
+            {active && (
+
+                <div
+                    className={`absolute inset-0 opacity-30 blur-2xl
+
+                    ${activeClass === "yellow"
+                            ? "bg-yellow-400"
+                            : activeClass === "blue"
+                                ? "bg-blue-500"
+                                : "bg-purple-500"
+                        }`}
+                />
+
+            )}
+
+            <div className="relative z-10 flex flex-col items-center gap-3">
 
                 <div
                     className={`flex size-12 items-center justify-center rounded-2xl
+                    transition-all duration-300
 
-          ${active
-                            ? iconStyles[
-                            activeClass
-                            ]
+                    ${active
+                            ? iconStyles[activeClass]
                             : "bg-white/10 text-white"
-                        }
-          `}
+                        }`}
                 >
+
                     {icon}
+
                 </div>
 
                 <div className="text-center">
 
                     <p
-                        className={`font-bold
+                        className={`font-bold text-sm
 
-            ${active
-                                ? textStyles[
-                                activeClass
-                                ]
+                        ${active
+                                ? textStyles[activeClass]
                                 : "text-white"
-                            }
-            `}
+                            }`}
                     >
                         {title}
                     </p>
 
-                    <p className="text-xs text-white/50">
+                    <p className="mt-1 text-xs text-white/50">
                         {subtitle}
                     </p>
+
                 </div>
+
             </div>
+
         </button>
     );
 }
