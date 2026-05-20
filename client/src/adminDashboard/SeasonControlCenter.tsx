@@ -77,7 +77,7 @@ export default function SeasonControlCenter() {
         useState("");
 
     const [auctionTimer, setAuctionTimer] =
-        useState(20);
+        useState(180);
 
     const [selectedOwnerId, setSelectedOwnerId] =
         useState("");
@@ -192,7 +192,7 @@ export default function SeasonControlCenter() {
 
             setAuctionIndex(nextIndex);
 
-            setAuctionTimer(20);
+            setAuctionTimer(180);
 
             setSoldTo("");
 
@@ -922,7 +922,7 @@ export default function SeasonControlCenter() {
 
                                             setSoldTo(owner.name);
 
-                                            setAuctionTimer(20);
+                                            setAuctionTimer(180);
                                         }}
                                         className="
             h-18 w-full
@@ -1195,7 +1195,7 @@ export default function SeasonControlCenter() {
                                         (prev) => prev + 1,
                                     );
 
-                                    setAuctionTimer(20);
+                                    setAuctionTimer(180);
 
                                     setCurrentBid(
                                         auctionPlayers[
