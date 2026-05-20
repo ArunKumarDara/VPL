@@ -30,7 +30,7 @@ export type CreateOwnerResponse = {
 
 export type GetAllOwnersResponse = {
   success: boolean;
-  count: number;
+  totalOwners: number;
   data: Owner[];
 };
 
@@ -117,13 +117,11 @@ export const buyPlayerApi = async (
   playerId: string,
   amount: number,
 ): Promise<BuyPlayerResponse> => {
-  const response = await api.put<BuyPlayerResponse>(
-    `/owners/${ownerId}/buy-player`,
-    {
-      playerId,
-      amount,
-    },
-  );
+  const response = await api.put<BuyPlayerResponse>(`/owners/buy-player`, {
+    playerId,
+    amount,
+    ownerId,
+  });
 
   return response.data;
 };
