@@ -98,17 +98,21 @@ export default function SeasonControlCenter() {
         enabled: !!seasonId,
     });
 
-    const players =
-        (season?.registeredPlayers || []).filter(
-            (player: any) =>
-                player.soldStatus === "UNSOLD",
-        );
+    // ALL REGISTERED PLAYERS -> FOR PLAYERS TAB
+    const allPlayers =
+        season?.registeredPlayers || [];
 
-    const owners =
-        season?.owners || [];
+    // ONLY UNSOLD PLAYERS -> FOR AUCTION
+    const auctionPlayers = allPlayers.filter(
+        (player: any) =>
+            player.soldStatus === "UNSOLD",
+    );
 
+    const owners = season?.owners || [];
+
+    // CURRENT AUCTION PLAYER
     const currentAuctionPlayer =
-        players?.[auctionIndex];
+        auctionPlayers?.[auctionIndex];
 
     const paginatedData = useMemo(() => {
         const start =
@@ -122,7 +126,7 @@ export default function SeasonControlCenter() {
             );
         }
 
-        return players.slice(
+        return allPlayers.slice(
             start,
             start + ITEMS_PER_PAGE,
         );
@@ -130,13 +134,13 @@ export default function SeasonControlCenter() {
         activeTab,
         currentPage,
         owners,
-        players,
+        allPlayers,
     ]);
 
     const totalPages = Math.ceil(
         (activeTab === "owners"
             ? owners.length
-            : players.length) /
+            : allPlayers.length) /
         ITEMS_PER_PAGE,
     );
 
@@ -177,7 +181,7 @@ export default function SeasonControlCenter() {
     }, [auctionStarted, auctionTimer]);
 
     const goToNextPlayer = () => {
-        if (auctionIndex < players.length - 1) {
+        if (auctionIndex < auctionPlayers.length - 1) {
             const nextIndex = auctionIndex + 1;
 
             setAuctionIndex(nextIndex);
@@ -189,7 +193,7 @@ export default function SeasonControlCenter() {
             setSelectedOwnerId("");
 
             setCurrentBid(
-                players[nextIndex]?.basePrice || 0,
+                auctionPlayers[nextIndex]?.basePrice || 0,
             );
         }
     };
@@ -339,7 +343,7 @@ export default function SeasonControlCenter() {
 
                                         <h2 className="mt-4 text-4xl font-black text-white">
                                             {
-                                                players.length
+                                                allPlayers.length
                                             }
                                         </h2>
 
@@ -1028,7 +1032,7 @@ export default function SeasonControlCenter() {
                                 setSoldModalOpen(false);
                                 if (
                                     auctionIndex <
-                                    players.length - 1
+                                    auctionPlayers.length - 1
                                 ) {
                                     setAuctionIndex(
                                         (prev) => prev + 1,
@@ -1037,7 +1041,7 @@ export default function SeasonControlCenter() {
                                     setAuctionTimer(20);
 
                                     setCurrentBid(
-                                        players[
+                                        auctionPlayers[
                                             auctionIndex + 1
                                         ]?.basePrice || 0,
                                     );
