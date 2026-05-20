@@ -10,6 +10,7 @@ import {
   deleteTeam,
   addPlayerToTeam,
 } from "../controllers/teamController.js";
+import upload from "../middlewares/upload.js";
 
 const router = express.Router();
 
@@ -18,7 +19,7 @@ const router = express.Router();
 // ======================================================
 
 // Create Team
-router.post("/", createTeam);
+router.post("/", upload.single("profileImage"), createTeam);
 
 // Get All Teams
 router.get("/", getAllTeams);
