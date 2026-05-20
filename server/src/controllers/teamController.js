@@ -84,6 +84,16 @@ export const createTeam = async (req, res) => {
       },
     );
 
+    await Owner.findByIdAndUpdate(
+      owner._id,
+      {
+        team: team._id,
+      },
+      {
+        new: true,
+      },
+    );
+
     res.status(201).json({
       success: true,
       message: "Team created successfully",
