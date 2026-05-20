@@ -1,6 +1,7 @@
 // controllers/playerController.js
 
 import Player from "../models/Player.js";
+import Season from "../models/Season.js";
 import { uploadToCloudinary } from "../utils/cloudinaryUpload.js";
 
 // ======================================================
@@ -11,7 +12,6 @@ export const createPlayer = async (req, res) => {
   try {
     const { name, village, mobile, basePrice, season, playingRole } = req.body;
 
-    // Validation
     if (!name || !village || !basePrice) {
       return res.status(400).json({
         success: false,
@@ -39,6 +39,15 @@ export const createPlayer = async (req, res) => {
       });
     }
 
+    const existingSeason = await Season.findById(season);
+
+    if (!existingSeason) {
+      return res.status(404).json({
+        success: false,
+        message: "Season not found",
+      });
+    }
+
     const uploadedImage = await uploadToCloudinary(req.file.buffer);
 
     // Create player
@@ -51,6 +60,19 @@ export const createPlayer = async (req, res) => {
       season,
       playingRole,
     });
+
+    await Season.findByIdAndUpdate(
+      season,
+      {
+        $push: {
+          registeredPlayers: player._id,
+        },
+      },
+      {
+        new: true,
+      },
+    );
+
     return res.status(201).json({
       success: true,
       message:
