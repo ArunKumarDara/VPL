@@ -120,13 +120,16 @@ export const getSingleSeason = async (req, res) => {
       .populate("registeredPlayers")
       .populate({
         path: "owners",
-        populate: {
-          path: "team",
-        },
+        populate: [
+          {
+            path: "team",
+          },
+          {
+            path: "boughtPlayers",
+          },
+        ],
       })
       .populate("teams");
-
-    console.log(season);
 
     if (!season) {
       return res.status(404).json({
