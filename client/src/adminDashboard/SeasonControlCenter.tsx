@@ -88,6 +88,12 @@ export default function SeasonControlCenter() {
     const [soldData, setSoldData] =
         useState<any>(null);
 
+    const [teamDialogOpen, setTeamDialogOpen] =
+        useState(false);
+
+    const [selectedOwner, setSelectedOwner] =
+        useState<any>(null);
+
     const {
         data: season,
         isLoading,
@@ -478,6 +484,10 @@ export default function SeasonControlCenter() {
                                                 owner: any,
                                             ) => (
                                                 <TableRow
+                                                    onClick={() => {
+                                                        setSelectedOwner(owner);
+                                                        setTeamDialogOpen(true);
+                                                    }}
                                                     key={
                                                         owner._id
                                                     }
@@ -956,6 +966,153 @@ export default function SeasonControlCenter() {
                     </div>
                 </div>
             </div>
+            <Dialog
+                open={teamDialogOpen}
+                onOpenChange={setTeamDialogOpen}
+            >
+                <DialogContent className="max-h-[90vh] overflow-hidden border border-yellow-400/20 bg-[#07111F] p-0 text-white sm:max-w-4xl">
+                    {/* HEADER */}
+                    <div className="relative overflow-hidden border-b border-white/10 p-8">
+                        <div className="absolute inset-0 bg-linear-to-r from-yellow-400/10 via-transparent to-orange-500/10" />
+
+                        <div className="relative z-10 flex items-center gap-5">
+                            <Avatar className="h-22 w-22 rounded-3xl border border-yellow-400/20">
+                                <AvatarImage
+                                    src={selectedOwner?.profileImage}
+                                />
+                            </Avatar>
+
+                            <div>
+                                <h2 className="text-4xl font-black text-white">
+                                    {selectedOwner?.name}
+                                </h2>
+
+                                <p className="mt-2 text-white/60">
+                                    {
+                                        selectedOwner?.team?.name
+                                    }
+                                </p>
+
+                                <div className="mt-4 flex items-center gap-3">
+                                    <Badge className="border-yellow-400/20 bg-yellow-400/10 text-yellow-300">
+                                        Team Squad
+                                    </Badge>
+
+                                    <Badge className="border-green-500/20 bg-green-500/10 text-green-300">
+                                        ₹
+                                        {ownerPurses[
+                                            selectedOwner?._id
+                                        ] || 0}{" "}
+                                        Purse Left
+                                    </Badge>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* PLAYERS */}
+                    <div className="max-h-[65vh] overflow-y-auto p-6">
+                        {!selectedOwner?.boughtPlayers ||
+                            selectedOwner.boughtPlayers.length ===
+                            0 ? (
+                            <div className="flex min-h-80 flex-col items-center justify-center text-center">
+                                <Users className="h-14 w-14 text-white/20" />
+
+                                <h3 className="mt-5 text-2xl font-black text-white">
+                                    No Players Purchased
+                                </h3>
+
+                                <p className="mt-2 text-white/50">
+                                    This owner has not purchased
+                                    any players yet.
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="grid gap-4 md:grid-cols-3">
+                                {selectedOwner.boughtPlayers.map(
+                                    (player: any) => (
+                                        <div
+                                            key={player._id}
+                                            className="group overflow-hidden rounded-[28px] border border-white/10 bg-[#0d1326] transition-all duration-300 hover:border-yellow-400/20 hover:bg-[#111827]"
+                                        >
+                                            <div className="relative">
+                                                <img
+                                                    src={
+                                                        player.profileImage
+                                                    }
+                                                    alt={player.name}
+                                                    className="h-52 w-full object-cover"
+                                                />
+
+                                                <div className="absolute inset-0 bg-linear-to-t from-black/70 via-transparent to-transparent" />
+
+                                                <Badge className="absolute right-4 top-4 border-green-500/20 bg-green-500/10 text-green-300">
+                                                    SOLD
+                                                </Badge>
+
+                                                <div className="absolute bottom-4 left-4">
+                                                    <h3 className="text-2xl font-black text-white">
+                                                        {player.name}
+                                                    </h3>
+
+                                                    <p className="text-sm text-yellow-300">
+                                                        {
+                                                            player.playingRole
+                                                        }
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <div className="p-5">
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div className="rounded-2xl border border-white/10 bg-[#111827] p-4">
+                                                        <p className="text-xs text-white/50">
+                                                            Base Price
+                                                        </p>
+
+                                                        <div className="mt-2 flex items-center text-xl font-black text-yellow-300">
+                                                            <IndianRupee className="mr-1 h-4 w-4" />
+
+                                                            {player.basePrice ||
+                                                                0}
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="rounded-2xl border border-green-500/20 bg-green-500/10 p-4">
+                                                        <p className="text-xs text-green-200/70">
+                                                            Purchased Price
+                                                        </p>
+
+                                                        <div className="mt-2 flex items-center text-xl font-black text-green-300">
+                                                            <IndianRupee className="mr-1 h-4 w-4" />
+
+                                                            {player.purchasePrice ||
+                                                                player.soldPrice ||
+                                                                0}
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="mt-4 flex items-center justify-between">
+                                                    <Badge className="border-white/10 bg-white/5 text-white">
+                                                        {player.role}
+                                                    </Badge>
+
+                                                    <span className="text-sm font-bold text-white/60">
+                                                        {
+                                                            player.village
+                                                        }
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ),
+                                )}
+                            </div>
+                        )}
+                    </div>
+                </DialogContent>
+            </Dialog>
             <Dialog
                 open={soldModalOpen}
                 onOpenChange={setSoldModalOpen}
