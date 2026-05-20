@@ -53,6 +53,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
     useMutation,
     useQuery,
+    useQueryClient,
 } from "@tanstack/react-query";
 
 import { toast } from "sonner";
@@ -62,7 +63,7 @@ import { registerPlayer } from "@/services/player/playerService";
 import { getAllSeasons } from "@/services/seasons/seasonsService"
 
 import { createOwner } from "@/services/owner/ownerService";
-
+import { useEffect } from "react";
 import { createAdmin } from "@/services/admin/adminService";
 
 // ======================================================
@@ -72,6 +73,7 @@ import { createAdmin } from "@/services/admin/adminService";
 type RegisterDialogProps = {
     open: boolean;
     onOpenChange: (open: boolean) => void;
+    defaultRole?: RoleType;
 };
 
 type ApiError = AxiosError<{
@@ -254,15 +256,17 @@ type RegisterFormData =
 export default function RegisterDialog({
     open,
     onOpenChange,
+    defaultRole = "PLAYER",
 }: RegisterDialogProps) {
-
+    const queryClient =
+        useQueryClient();
     // ======================================================
     // STATES
     // ======================================================
 
     const [role, setRole] =
         useState<RoleType>(
-            "PLAYER",
+            defaultRole,
         );
 
     const [previewImage, setPreviewImage] =
@@ -302,13 +306,23 @@ export default function RegisterDialog({
             ),
 
         defaultValues: {
-            roleType:
-                "PLAYER",
+            roleType: defaultRole,
         },
     });
 
     const selectedRole =
         watch("roleType");
+
+    useEffect(() => {
+
+        setRole(defaultRole);
+
+        setValue(
+            "roleType",
+            defaultRole,
+        );
+
+    }, [defaultRole, setValue]);
 
     const {
         data: seasonsData,
@@ -387,6 +401,17 @@ export default function RegisterDialog({
                     description: data.message
                 }
             );
+            queryClient.invalidateQueries({
+                queryKey: ["all-seasons"],
+            });
+
+            queryClient.invalidateQueries({
+                queryKey: ["all-teams"],
+            });
+
+            queryClient.invalidateQueries({
+                queryKey: ["all-owners"],
+            });
 
             resetForm();
         },
