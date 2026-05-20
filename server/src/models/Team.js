@@ -10,7 +10,7 @@ const teamSchema = new mongoose.Schema(
       unique: true,
     },
 
-    logo: {
+    profileImage: {
       type: String,
     },
     ownerName: {
