@@ -20,7 +20,7 @@ router.get("/", getAllOwners);
 
 router.get("/:id", getSingleOwner);
 
-router.post("/buy-player", buyPlayer);
+router.put("/buy-player", buyPlayer);
 
 router.get("/:id/purse", getOwnerPurseDetails);
 
