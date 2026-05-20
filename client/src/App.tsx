@@ -8,6 +8,7 @@ import MatchesPage from "./pages/MatchesPage"
 import AuctionPage from "./pages/AuctionPage"
 import PlayerHomePage from "./pages/PlayerHomePage";
 import AdminDashboard from "./adminDashboard/AdminDashboard";
+import SeasonControlCenter from "./adminDashboard/SeasonControlCenter";
 
 
 export default function App() {
@@ -20,6 +21,10 @@ export default function App() {
       <Route path="/auction" element={<AuctionPage />} />
       <Route path="/player" element={<PlayerHomePage />} />
       <Route path="/admin" element={<AdminDashboard />} />
+      <Route
+        path="/admin/seasons/:seasonId/control-center"
+        element={<SeasonControlCenter />}
+      />
     </Routes>
   );
 }
