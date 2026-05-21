@@ -7,8 +7,6 @@ import {
     Shield,
     Hammer,
     Calendar,
-    CircleDot,
-    Clock3,
     Sparkles,
     ChevronRight,
 } from "lucide-react";
@@ -57,13 +55,6 @@ const quickActions = [
         description: "Start or configure auction",
         icon: Hammer,
     },
-];
-
-const activity = [
-    "Season created",
-    "New owner assigned",
-    "Player registered",
-    "Auction configured",
 ];
 
 export default function AdminDashboard() {
