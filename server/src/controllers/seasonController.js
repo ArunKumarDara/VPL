@@ -117,7 +117,12 @@ export const getSingleSeason = async (req, res) => {
     }
 
     const season = await Season.findById(id)
-      .populate("registeredPlayers")
+      .populate({
+        path: "registeredPlayers",
+        populate: {
+          path: "currentTeam",
+        },
+      })
       .populate({
         path: "owners",
         populate: [
