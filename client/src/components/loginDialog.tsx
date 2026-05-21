@@ -164,7 +164,7 @@ export default function LoginDialog({
 
                     case "PLAYER":
                         navigate(
-                            "/player"
+                            `/players/${data.user._id}`
                         );
                         break;
 
