@@ -1,13 +1,168 @@
 // pages/MatchesPage.tsx
+
 import Navbar from "@/components/Navbar";
+
+import {
+    CalendarDays,
+    Trophy,
+    Clock3,
+    Shield,
+    Sparkles,
+    ChevronRight,
+} from "lucide-react";
+
+import { Badge } from "@/components/ui/badge";
+
+import {
+    Card,
+    CardContent,
+} from "@/components/ui/card";
+
+import { Button } from "@/components/ui/button";
 
 export default function MatchesPage() {
     return (
-        <div className="min-h-screen bg-[#050816] text-white">
+        <div className="min-h-screen overflow-hidden bg-[#050816] text-white">
             <Navbar />
 
-            <div className="flex min-h-screen items-center justify-center text-5xl font-black">
-                Matches Page
+            {/* BACKGROUND */}
+            <div className="fixed inset-0 -z-10 overflow-hidden">
+                <div className="absolute left-[-10%] top-[-10%] h-[420px] w-[420px] rounded-full bg-yellow-500/10 blur-[120px]" />
+
+                <div className="absolute bottom-[-10%] right-[-10%] h-[420px] w-[420px] rounded-full bg-orange-500/10 blur-[120px]" />
+            </div>
+
+            <div className="mx-auto flex min-h-screen max-w-6xl items-center px-4 py-28">
+                <div className="grid w-full items-center gap-10 lg:grid-cols-[1.1fr_0.9fr]">
+                    {/* LEFT */}
+                    <div>
+                        <Badge className="border border-yellow-400/20 bg-yellow-400/10 px-4 py-2 text-yellow-300">
+                            <Sparkles className="mr-2 h-4 w-4" />
+                            MATCH CENTER
+                        </Badge>
+
+                        <h1 className="mt-7 text-6xl font-black leading-none tracking-tight md:text-7xl">
+                            Matches
+                            <br />
+
+                            <span className="bg-linear-to-r from-yellow-300 to-orange-400 bg-clip-text text-transparent">
+                                Coming Soon
+                            </span>
+                        </h1>
+
+                        <p className="mt-7 max-w-2xl text-lg leading-8 text-white/50">
+                            Soon you'll be able to explore
+                            upcoming fixtures, completed matches,
+                            score summaries, winning teams and
+                            full tournament match history.
+                        </p>
+
+                        {/* FEATURES */}
+                        <div className="mt-10 grid gap-4 sm:grid-cols-2">
+                            <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-xl">
+                                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-yellow-400/10">
+                                    <CalendarDays className="h-6 w-6 text-yellow-300" />
+                                </div>
+
+                                <h3 className="mt-4 text-lg font-black">
+                                    Upcoming Matches
+                                </h3>
+
+                                <p className="mt-2 text-sm leading-6 text-white/45">
+                                    Match schedules with teams,
+                                    timings and venues.
+                                </p>
+                            </div>
+
+                            <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-xl">
+                                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-green-500/10">
+                                    <Trophy className="h-6 w-6 text-green-300" />
+                                </div>
+
+                                <h3 className="mt-4 text-lg font-black">
+                                    Match Results
+                                </h3>
+
+                                <p className="mt-2 text-sm leading-6 text-white/45">
+                                    Final scores, winners and
+                                    player performances.
+                                </p>
+                            </div>
+
+                            <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-xl">
+                                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-500/10">
+                                    <Clock3 className="h-6 w-6 text-blue-300" />
+                                </div>
+
+                                <h3 className="mt-4 text-lg font-black">
+                                    Match Timeline
+                                </h3>
+
+                                <p className="mt-2 text-sm leading-6 text-white/45">
+                                    Easily browse past and future
+                                    matches season wise.
+                                </p>
+                            </div>
+
+                            <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-xl">
+                                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-500/10">
+                                    <Shield className="h-6 w-6 text-orange-300" />
+                                </div>
+
+                                <h3 className="mt-4 text-lg font-black">
+                                    Team Matchups
+                                </h3>
+
+                                <p className="mt-2 text-sm leading-6 text-white/45">
+                                    Track rivalries and all team
+                                    face-offs in one place.
+                                </p>
+                            </div>
+                        </div>
+
+                        <Button className="mt-10 h-13 rounded-2xl bg-yellow-400 px-7 text-base font-black text-black hover:bg-yellow-300">
+                            Launching Soon
+                            <ChevronRight className="ml-2 h-5 w-5" />
+                        </Button>
+                    </div>
+
+                    {/* RIGHT */}
+                    {/* RIGHT */}
+                    <div className="relative flex items-center justify-center">
+                        <div className="relative flex h-[520px] w-full items-center justify-center overflow-hidden rounded-[40px] border border-white/10 bg-[#0B1220]/90">
+                            {/* GLOW */}
+                            <div className="absolute h-72 w-72 rounded-full bg-yellow-400/10 blur-[120px]" />
+
+                            {/* CENTER CONTENT */}
+                            <div className="relative z-10 text-center">
+                                <div className="mx-auto flex h-28 w-28 items-center justify-center rounded-full border border-yellow-400/20 bg-yellow-400/10">
+                                    <CalendarDays className="h-14 w-14 text-yellow-300" />
+                                </div>
+
+                                <h2 className="mt-8 text-5xl font-black tracking-tight text-white">
+                                    Matches
+                                </h2>
+
+                                <p className="mt-4 text-lg text-white/45">
+                                    Schedules & results arriving soon
+                                </p>
+
+                                <div className="mt-10 flex items-center justify-center gap-3">
+                                    <Badge className="border border-white/10 bg-white/[0.04] px-4 py-2 text-white">
+                                        Upcoming Matches
+                                    </Badge>
+
+                                    <Badge className="border border-white/10 bg-white/[0.04] px-4 py-2 text-white">
+                                        Match Results
+                                    </Badge>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* OUTER GLOW */}
+                        <div className="absolute -bottom-10 left-1/2 -z-10 h-44 w-44 -translate-x-1/2 rounded-full bg-yellow-400/10 blur-[100px]" />
+                    </div>
+                </div>
             </div>
         </div>
     );
