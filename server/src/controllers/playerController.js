@@ -96,6 +96,7 @@ export const getAllPlayers = async (req, res) => {
     const players = await Player.find()
       .populate("currentTeam")
       .populate("season")
+      .populate("currentTeam")
       .sort({ createdAt: -1 });
 
     return res.status(200).json({
@@ -120,8 +121,27 @@ export const getSinglePlayer = async (req, res) => {
     const { id } = req.params;
 
     const player = await Player.findById(id)
-      .populate("currentTeam")
-      .populate("season");
+      .populate({
+        path: "currentTeam",
+        populate: [
+          {
+            path: "players",
+            populate: [
+              {
+                path: "currentTeam",
+              },
+              {
+                path: "ownerName",
+              },
+            ],
+          },
+          {
+            path: "ownerName",
+          },
+        ],
+      })
+      .populate("season")
+      .populate("ownerName");
 
     if (!player) {
       return res.status(404).json({
