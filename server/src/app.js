@@ -17,7 +17,10 @@ app.use(helmet());
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: [
+      "http://localhost:5173",
+      "http://redfortpremierleague.s3-website-ap-southeast-2.amazonaws.com",
+    ],
     credentials: true,
   }),
 );
