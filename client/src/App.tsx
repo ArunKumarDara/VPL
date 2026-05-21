@@ -19,7 +19,7 @@ export default function App() {
       <Route path="/players" element={<PlayersPage />} />
       <Route path="/matches" element={<MatchesPage />} />
       <Route path="/auction" element={<AuctionPage />} />
-      <Route path="/player" element={<PlayerHomePage />} />
+      <Route path="/players/:id" element={<PlayerHomePage />} />
       <Route path="/admin" element={<AdminDashboard />} />
       <Route
         path="/admin/seasons/:seasonId/control-center"
