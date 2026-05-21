@@ -29,6 +29,7 @@ import { useState } from "react";
 import RegisterDialog from "@/components/RegisterDialog";
 import CreateTeamDialog from "@/components/createTeamDialog";
 import { Season } from "@/api/seasonApi";
+import CreateSeasonDialog from "@/components/CreateSeasonDialog";
 
 const quickActions = [
 
@@ -69,6 +70,8 @@ export default function AdminDashboard() {
     const navigate = useNavigate();
     const [openOwnerModal, setOpenOwnerModal] = useState(false);
     const [openTeamModal, setOpenTeamModal] = useState(false);
+    const [openSeasonModal, setOpenSeasonModal] =
+        useState(false);
     const {
         data: seasons = [],
         isLoading: seasonsLoading,
@@ -255,6 +258,9 @@ export default function AdminDashboard() {
                                 <div className="mt-10 flex flex-wrap gap-4">
 
                                     <Button
+                                        onClick={() =>
+                                            setOpenSeasonModal(true)
+                                        }
                                         className="
                                         h-12 rounded-2xl
                                         bg-linear-to-r
@@ -270,23 +276,6 @@ export default function AdminDashboard() {
                                         "
                                     >
                                         Create Season
-                                    </Button>
-
-                                    <Button
-                                        variant="outline"
-                                        className="
-                                        h-12 rounded-2xl
-                                        border-white/15
-                                        bg-white/10
-                                        px-7
-                                        text-white
-                                        backdrop-blur-xl
-                                        transition-all duration-300
-                                        hover:border-yellow-400/30
-                                        hover:bg-yellow-400/10
-                                        "
-                                    >
-                                        Start Auction
                                     </Button>
 
                                 </div>
@@ -804,13 +793,15 @@ export default function AdminDashboard() {
 
                     {/* ACTIVITY */}
 
+                    {/* RPL INFO CARD */}
+
                     <Card
                         className="
-                        overflow-hidden rounded-3xl
-                        border border-white/10
-                        bg-[#0f172d]
-                        backdrop-blur-xl
-                        "
+    overflow-hidden rounded-3xl
+    border border-white/10
+    bg-[#0f172d]
+    backdrop-blur-xl
+    "
                     >
 
                         <CardContent className="p-7">
@@ -819,25 +810,26 @@ export default function AdminDashboard() {
 
                                 <div
                                     className="
-                                    rounded-2xl
-                                    bg-yellow-400/10
-                                    p-3 text-yellow-400
-                                    "
+                rounded-2xl
+                bg-yellow-400/10
+                p-3
+                text-yellow-400
+                "
                                 >
-                                    <Clock3 size={22} />
+                                    <Trophy size={22} />
                                 </div>
 
                                 <div>
 
                                     <h2 className="text-2xl font-black text-white">
 
-                                        Activity
+                                        RPL Insights
 
                                     </h2>
 
                                     <p className="text-sm font-medium text-white/50">
 
-                                        Recent updates
+                                        Tournament overview
 
                                     </p>
 
@@ -845,54 +837,176 @@ export default function AdminDashboard() {
 
                             </div>
 
-                            <div className="mt-8 space-y-6">
+                            <div className="mt-8 space-y-5">
 
-                                {activity.map((item) => (
+                                <div
+                                    className="
+                rounded-2xl
+                border border-white/10
+                bg-[#11182f]
+                p-5
+                "
+                                >
+                                    <p className="text-sm text-white/60">
+
+                                        Current Season
+
+                                    </p>
+
+                                    <h3 className="mt-2 text-2xl font-black text-yellow-300">
+
+                                        {latestSeason?.title || "Not Created"}
+
+                                    </h3>
+
+                                </div>
+
+                                <div
+                                    className="
+                rounded-2xl
+                border border-white/10
+                bg-[#11182f]
+                p-5
+                "
+                                >
+                                    <p className="text-sm text-white/60">
+
+                                        Tournament Status
+
+                                    </p>
 
                                     <div
-                                        key={item}
-                                        className="
-                                        flex gap-4 rounded-2xl
-                                        border border-white/5
-                                        bg-[#11182f]
-                                        p-4
-                                        "
+                                        className={`
+                    mt-3 inline-flex rounded-full px-4 py-2
+                    text-sm font-bold
+
+                    ${latestSeason?.status === "LIVE"
+                                                ? "bg-green-500/10 text-green-400"
+                                                : latestSeason?.status === "COMPLETED"
+                                                    ? "bg-blue-500/10 text-blue-400"
+                                                    : "bg-yellow-500/10 text-yellow-300"
+                                            }
+                    `}
                                     >
 
-                                        <div
-                                            className="
-                                            mt-1 flex h-9 w-9
-                                            items-center justify-center
-                                            rounded-full bg-yellow-400/10
-                                            "
-                                        >
+                                        {latestSeason?.status || "UPCOMING"}
 
-                                            <CircleDot
-                                                size={16}
-                                                className="text-yellow-400"
-                                            />
+                                    </div>
+
+                                </div>
+
+                                <div
+                                    className="
+                rounded-2xl
+                border border-white/10
+                bg-[#11182f]
+                p-5
+                "
+                                >
+
+                                    <p className="text-sm text-white/60">
+
+                                        Registered Progress
+
+                                    </p>
+
+                                    <div className="mt-4 space-y-3">
+
+                                        <div>
+
+                                            <div className="flex justify-between text-sm">
+
+                                                <span className="text-white/70">
+
+                                                    Teams
+
+                                                </span>
+
+                                                <span className="font-bold">
+
+                                                    {teams?.count || 0}
+
+                                                </span>
+
+                                            </div>
+
+                                            <div className="mt-2 h-2 rounded-full bg-white/10">
+
+                                                <div
+                                                    className="h-full rounded-full bg-yellow-400"
+                                                    style={{
+                                                        width: `${Math.min(
+                                                            ((teams?.count || 0) / 10) * 100,
+                                                            100
+                                                        )}%`,
+                                                    }}
+                                                />
+                                            </div>
 
                                         </div>
 
                                         <div>
 
-                                            <p className="font-medium text-white">
+                                            <div className="flex justify-between text-sm">
 
-                                                {item}
+                                                <span className="text-white/70">
 
-                                            </p>
+                                                    Players
 
-                                            <p className="mt-1 text-xs font-medium text-white/50">
+                                                </span>
 
-                                                Just now
+                                                <span className="font-bold">
 
-                                            </p>
+                                                    {players?.totalPlayers || 0}
+
+                                                </span>
+
+                                            </div>
+
+                                            <div className="mt-2 h-2 rounded-full bg-white/10">
+
+                                                <div
+                                                    className="h-full rounded-full bg-orange-400"
+                                                    style={{
+                                                        width: `${Math.min(
+                                                            ((players?.totalPlayers || 0) /
+                                                                100) *
+                                                            100,
+                                                            100
+                                                        )}%`,
+                                                    }}
+                                                />
+                                            </div>
 
                                         </div>
 
                                     </div>
 
-                                ))}
+                                </div>
+
+                                <div
+                                    className="
+                rounded-2xl
+                border border-yellow-400/20
+                bg-yellow-400/10
+                p-5
+                "
+                                >
+
+                                    <p className="text-sm text-yellow-200">
+
+                                        Tip
+
+                                    </p>
+
+                                    <p className="mt-2 text-sm leading-6 text-white/80">
+
+                                        Create teams and register players before
+                                        starting the auction process.
+
+                                    </p>
+
+                                </div>
 
                             </div>
 
@@ -911,6 +1025,12 @@ export default function AdminDashboard() {
             <CreateTeamDialog
                 open={openTeamModal}
                 onOpenChange={setOpenTeamModal}
+            />
+            <CreateSeasonDialog
+                open={openSeasonModal}
+                onOpenChange={
+                    setOpenSeasonModal
+                }
             />
 
         </div>
