@@ -10,18 +10,8 @@ import Season from "../models/Season.js";
 
 export const createSeason = async (req, res) => {
   try {
-    const {
-      title,
-      year,
-      auctionDate,
-      tournamentStartDate,
-      tournamentEndDate,
-      status,
-      registeredPlayers,
-      owners,
-      teams,
-      players,
-    } = req.body;
+    const { title, year, auctionDate, tournamentStartDate, tournamentEndDate } =
+      req.body;
 
     // VALIDATION
 
@@ -35,7 +25,10 @@ export const createSeason = async (req, res) => {
     // CHECK DUPLICATE YEAR
 
     const existingSeason = await Season.findOne({
-      year,
+      title: {
+        $regex: `^${title.trim()}$`,
+        $options: "i", // case-insensitive
+      },
     });
 
     if (existingSeason) {
@@ -53,11 +46,6 @@ export const createSeason = async (req, res) => {
       auctionDate,
       tournamentStartDate,
       tournamentEndDate,
-      status,
-      registeredPlayers: registeredPlayers || [],
-      owners: owners || [],
-      teams: teams || [],
-      players: players || [],
     });
 
     return res.status(201).json({
