@@ -55,8 +55,6 @@ export type Season = {
 
     status: "UPCOMING" | "LIVE" | "COMPLETED";
 
-    // RELATIONS
-
     registeredPlayers: Player[];
 
     owners: Owner[];
@@ -70,6 +68,27 @@ export type Season = {
     updatedAt: string;
 };
 
+// ======================================================
+// CREATE SEASON TYPES
+// ======================================================
+
+export type CreateSeasonPayload = {
+    title: string;
+    year: number;
+
+    auctionDate?: string;
+
+    tournamentStartDate?: string;
+
+    tournamentEndDate?: string;
+
+};
+
+export type CreateSeasonResponse = {
+    success: boolean;
+    message: string;
+    season: Season;
+};
 
 // ======================================================
 // GET ALL SEASONS
@@ -81,10 +100,30 @@ export const getAllSeasonsApi = async (): Promise<Season[]> => {
     return response.data.seasons;
 };
 
+// ======================================================
+// GET SINGLE SEASON
+// ======================================================
+
 export const getSeasonByIdApi = async (
     seasonId: string,
 ): Promise<Season> => {
     const response = await api.get(`/seasons/${seasonId}`);
-    console.log(response)
+
     return response.data.season;
+};
+
+// ======================================================
+// CREATE SEASON
+// ======================================================
+
+export const createSeasonApi = async (
+    data: CreateSeasonPayload,
+): Promise<CreateSeasonResponse> => {
+    const response =
+        await api.post<CreateSeasonResponse>(
+            "/seasons",
+            data,
+        );
+
+    return response.data;
 };
