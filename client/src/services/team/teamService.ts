@@ -18,7 +18,6 @@ export const createTeam = async (data: FormData) => {
 
 export const getAllTeams = async () => {
   const response = await getAllTeamsApi();
-  console.log(response);
   return response;
 };
 
