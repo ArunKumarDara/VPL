@@ -10,6 +10,7 @@ import {
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { AxiosError } from "axios";
 
 import {
     Calendar,
@@ -79,6 +80,10 @@ type Props = {
     ) => void;
 };
 
+type ApiError = AxiosError<{
+    message?: string;
+}>;
+
 export default function CreateSeasonDialog({
     open,
     onOpenChange,
@@ -94,21 +99,19 @@ export default function CreateSeasonDialog({
         formState: {
             errors,
         },
-    } = useForm<FormData>({
-        resolver:
-            zodResolver(
-                createSeasonSchema
-            ),
+    } = useForm<
+        z.input<typeof createSeasonSchema>,
+        any,
+        z.output<typeof createSeasonSchema>
+    >({
+        resolver: zodResolver(createSeasonSchema),
 
         defaultValues: {
             title: "",
-            year:
-                new Date().getFullYear(),
+            year: new Date().getFullYear(),
             auctionDate: "",
-            tournamentStartDate:
-                "",
-            tournamentEndDate:
-                "",
+            tournamentStartDate: "",
+            tournamentEndDate: "",
         },
     });
 
@@ -136,7 +139,7 @@ export default function CreateSeasonDialog({
             },
 
             onError: (
-                error: any
+                error: ApiError
             ) => {
                 toast.error(
                     error?.response

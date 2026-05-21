@@ -8,7 +8,6 @@ import {
   deleteOwnerApi,
   DeleteOwnerResponse,
   getAllOwnersApi,
-  GetAllOwnersResponse,
   getOwnerByIdApi,
   GetOwnerResponse,
   updateOwnerApi,
@@ -28,7 +27,7 @@ export const createOwner = async (
 };
 
 // GET ALL OWNERS
-export const getAllOwners = async (): Promise<GetAllOwnersResponse> => {
+export const getAllOwners = async () => {
   return await getAllOwnersApi();
 };
 

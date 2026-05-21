@@ -804,8 +804,7 @@ export default function SeasonControlCenter() {
                                                                     <CommandGroup heading="Auction Players">
                                                                         {filteredAuctionPlayers.map(
                                                                             (
-                                                                                player: any,
-                                                                                index: number,
+                                                                                player: any
                                                                             ) => (
                                                                                 <CommandItem
                                                                                     key={

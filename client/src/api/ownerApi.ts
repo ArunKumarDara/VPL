@@ -1,6 +1,7 @@
 // api/ownerApi.ts
 
 import api from "./axios";
+import { Team } from "./seasonApi";
 
 // ======================================================
 // TYPES
@@ -54,6 +55,7 @@ export type BuyPlayerResponse = {
   success: boolean;
   message: string;
   data: Owner;
+  team: Team;
 };
 
 // ======================================================
@@ -74,8 +76,8 @@ export const createOwnerApi = async (
 };
 
 // GET ALL OWNERS
-export const getAllOwnersApi = async (): Promise<GetAllOwnersResponse> => {
-  const response = await api.get<GetAllOwnersResponse>("/owners");
+export const getAllOwnersApi = async () => {
+  const response = await api.get("/owners");
 
   return response.data;
 };
