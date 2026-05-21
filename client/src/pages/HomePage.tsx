@@ -16,6 +16,7 @@ import LoginDialog from "@/components/loginDialog"
 
 import heroImg from "../assets/vpl-home1.jpg";
 import Navbar from "@/components/Navbar";
+import { useNavigate } from "react-router-dom";
 
 type StatCardProps = {
     icon: ReactNode;
@@ -38,6 +39,7 @@ const stats = [
 ];
 
 export default function HomePage() {
+    const navigate = useNavigate()
     const targetDate = new Date("2026-05-28T09:00:00");
 
     const [registerOpen, setRegisterOpen] = useState(false);
@@ -118,7 +120,7 @@ export default function HomePage() {
                 <section className="relative z-10 mx-auto flex max-w-7xl flex-col gap-10 px-4 pb-14 pt-10 sm:px-6 sm:pt-16 lg:gap-14 lg:pb-20">
                     <div className="max-w-3xl">
                         <p className="mb-4 text-xs font-bold uppercase tracking-[0.45em] text-yellow-300/90 sm:text-sm">
-                            Season 1
+                            Season 2
                         </p>
 
                         <h2 className="max-w-4xl text-5xl font-black uppercase leading-[0.95] sm:text-6xl md:text-7xl lg:text-8xl">
@@ -146,6 +148,7 @@ export default function HomePage() {
                             </Button>
 
                             <Button
+                                onClick={() => navigate("/teams")}
                                 variant="outline"
                                 className="h-13 rounded-xl border-white/20 bg-white/10 px-8 text-base font-bold text-white hover:bg-white/15"
                             >
@@ -237,7 +240,7 @@ export default function HomePage() {
                                     <Separator />
 
                                     <p className="mt-1 text-base font-semibold">
-                                        98765 43210
+                                        7799116854
                                     </p>
                                 </div>
 
