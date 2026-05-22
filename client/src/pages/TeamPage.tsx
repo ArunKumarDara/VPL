@@ -390,137 +390,125 @@ export default function TeamsPage() {
                 open={teamDialogOpen}
                 onOpenChange={setTeamDialogOpen}
             >
-                <DialogContent className="max-h-[92vh] overflow-hidden border border-white/10 bg-[#07111F] p-0 text-white sm:max-w-6xl">
+                <DialogContent className="w-[95vw] md:h-[92vh] max-w-6xl overflow-hidden border border-white/10 bg-[#07111F] p-0 text-white sm:max-w-6xl">
                     {/* HEADER */}
-                    <div className="border-b border-white/10 bg-[#0B1220] p-8">
-                        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-                            <div className="flex items-center gap-5">
-                                <div className="flex h-24 w-24 items-center justify-center rounded-4xl border border-yellow-400/20 bg-yellow-400/10 text-5xl font-black text-yellow-300">
-                                    <Avatar className="h-24 w-24 border border-white/10">
-                                        <AvatarImage
-                                            src={
-                                                selectedTeam?.profileImage
-                                            }
-                                        />
-                                    </Avatar>
-                                </div>
+                    <div className="border-b border-white/10 bg-[#0B1220] p-4 sm:p-8 shrink-0">
+                        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+
+                            <div className="flex items-center gap-4">
+                                <Avatar className="h-16 w-16 sm:h-24 sm:w-24 border border-white/10 rounded-3xl">
+                                    <AvatarImage
+                                        src={selectedTeam?.profileImage}
+                                    />
+                                </Avatar>
 
                                 <div>
-                                    <h2 className="text-5xl font-black tracking-tight">
-                                        {
-                                            selectedTeam?.name
-                                        }
+                                    <h2 className="text-2xl sm:text-5xl font-black tracking-tight">
+                                        {selectedTeam?.name}
                                     </h2>
 
-                                    <div className="mt-4 flex items-center gap-3">
+                                    <div className="mt-3 flex flex-wrap gap-2">
+
                                         <Badge className="border-yellow-400/20 bg-yellow-400/10 text-yellow-300">
                                             <Crown className="mr-1 h-3 w-3" />
-                                            {
-                                                selectedTeam
-                                                    ?.owner
-                                                    ?.name
-                                            }
+                                            {selectedTeam?.owner?.name}
                                         </Badge>
 
                                         <Badge className="border-green-500/20 bg-green-500/10 text-green-300">
-                                            {
-                                                selectedTeam
-                                                    ?.owner
-                                                    ?.boughtPlayers
-                                                    ?.length ||
-                                                0
-                                            }{" "}
+                                            {selectedTeam?.owner
+                                                ?.boughtPlayers?.length || 0}{" "}
                                             Players
                                         </Badge>
+
                                     </div>
                                 </div>
                             </div>
+
                         </div>
                     </div>
 
+
                     {/* PLAYERS */}
-                    <div className="max-h-[70vh] overflow-y-auto p-8">
-                        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                    <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+
                             {selectedTeam?.owner?.boughtPlayers?.map(
                                 (player: any) => (
                                     <div
                                         key={player._id}
-                                        className="overflow-hidden rounded-[28px] border border-white/10 bg-[#0B1220]"
+                                        className="overflow-hidden rounded-3xl border border-white/10 bg-[#0B1220]"
                                     >
+                                        {/* IMAGE */}
                                         <div className="relative">
                                             <img
-                                                src={
-                                                    player.profileImage
-                                                }
-                                                alt={
-                                                    player.name
-                                                }
-                                                className="h-64 w-full object-cover"
+                                                src={player.profileImage}
+                                                alt={player.name}
+                                                className="w-full h-48 sm:h-64 object-cover"
                                             />
 
-                                            <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent" />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
 
-                                            <div className="absolute bottom-4 left-4">
-                                                <h3 className="text-2xl font-black text-white">
-                                                    {
-                                                        player.name
-                                                    }
+                                            <div className="absolute bottom-3 left-3">
+                                                <h3 className="text-lg sm:text-2xl font-black text-white">
+                                                    {player.name}
                                                 </h3>
 
-                                                <p className="text-sm text-yellow-300">
-                                                    {
-                                                        player.playingRole
-                                                    }
+                                                <p className="text-xs sm:text-sm text-yellow-300">
+                                                    {player.playingRole}
                                                 </p>
                                             </div>
                                         </div>
 
-                                        <div className="space-y-4 p-5">
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                                                    <p className="text-xs uppercase tracking-wider text-white/40">
+                                        {/* DETAILS */}
+                                        <div className="space-y-3 p-4">
+
+                                            <div className="grid grid-cols-2 gap-3">
+
+                                                <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
+                                                    <p className="text-xs uppercase text-white/40">
                                                         Base
                                                     </p>
 
-                                                    <h4 className="mt-2 text-2xl font-black text-white">
-                                                        ₹
-                                                        {player.basePrice ||
-                                                            0}
+                                                    <h4 className="mt-2 text-lg sm:text-xl font-bold text-white">
+                                                        ₹{player.basePrice || 0}
                                                     </h4>
                                                 </div>
 
-                                                <div className="rounded-2xl border border-green-500/20 bg-green-500/10 p-4">
-                                                    <p className="text-xs uppercase tracking-wider text-green-200/70">
+                                                <div className="rounded-xl border border-green-500/20 bg-green-500/10 p-3">
+                                                    <p className="text-xs uppercase text-green-200/70">
                                                         Bought
                                                     </p>
 
-                                                    <h4 className="mt-2 text-2xl font-black text-green-300">
+                                                    <h4 className="mt-2 text-lg sm:text-xl font-bold text-green-300">
                                                         ₹
                                                         {player.purchasePrice ||
                                                             player.soldPrice ||
                                                             0}
                                                     </h4>
                                                 </div>
+
                                             </div>
 
-                                            <div className="flex items-center justify-between">
+                                            <div className="flex items-center justify-between flex-wrap gap-2">
+
                                                 <Badge className="border-white/10 bg-white/5 text-white">
-                                                    {
-                                                        player.role
-                                                    }
+                                                    {player.role}
                                                 </Badge>
 
-                                                <span className="text-sm font-semibold text-white/40">
-                                                    {
-                                                        player.village
-                                                    }
+                                                <span className="text-xs sm:text-sm text-white/40">
+                                                    {player.village}
                                                 </span>
+
                                             </div>
+
                                         </div>
                                     </div>
-                                ),
+                                )
                             )}
+
                         </div>
+
                     </div>
                 </DialogContent>
             </Dialog>

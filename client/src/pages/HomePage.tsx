@@ -252,7 +252,7 @@ export default function HomePage() {
                                     <Separator />
 
                                     <p className="mt-1 text-base font-semibold">
-                                        91234 56789
+                                        7285995426
                                     </p>
                                 </div>
                             </div>
