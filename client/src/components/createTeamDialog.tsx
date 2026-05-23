@@ -154,7 +154,7 @@ export default function CreateTeamDialog({
             zodResolver(schema),
 
         defaultValues: {
-            maxPlayers: "17",
+            maxPlayers: "25",
         },
     });
 
