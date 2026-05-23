@@ -9,6 +9,7 @@ import AuctionPage from "./pages/AuctionPage"
 import PlayerHomePage from "./pages/PlayerHomePage";
 import AdminDashboard from "./adminDashboard/AdminDashboard";
 import SeasonControlCenter from "./adminDashboard/SeasonControlCenter";
+import SeasonAuctionPage from "./adminDashboard/SeasonAuction";
 
 
 export default function App() {
@@ -24,6 +25,10 @@ export default function App() {
       <Route
         path="/admin/seasons/:seasonId/control-center"
         element={<SeasonControlCenter />}
+      />
+      <Route
+        path="/admin/seasons/:seasonId/auction"
+        element={<SeasonAuctionPage />}
       />
     </Routes>
   );
